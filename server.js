@@ -18,10 +18,12 @@ app.use((req, res, next) => {
 
 const cors = require("cors");
 
+const liveOrigin = "https://nft-marketplace-8d2b771c4c75.herokuapp.com/";
+
 // bezpieczniej: tylko Twojemu lokalnemu devowi i produkcji
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://nft.webdread.com"],
+    origin: ["http://localhost:3000", liveOrigin],
   })
 );
 
