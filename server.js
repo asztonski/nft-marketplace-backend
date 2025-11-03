@@ -42,16 +42,6 @@ app.get("/api/time", (req, res) => {
   res.json({ now: new Date().toISOString() });
 });
 
-// JSON API: sample users list
-const sampleUsers = [
-  { id: 1, name: "Alicja" },
-  { id: 2, name: "Bartek" },
-  { id: 3, name: "Celina" },
-];
-app.get("/api/users", (req, res) => {
-  res.json(sampleUsers);
-});
-
 // POST echo: returns the JSON body back to the client
 app.post("/api/echo", (req, res) => {
   res.json({ received: req.body });
@@ -64,7 +54,7 @@ app.get("/health", (req, res) => {
 
 // --- MongoDB endpoint ---
 // MUSI BYĆ PRZED 404 middleware
-app.get("/api/mongo-users", async (req, res) => {
+app.get("/api/users", async (req, res) => {
   try {
     const db = getDB();
     const users = await db.collection("users").find({}).toArray();
