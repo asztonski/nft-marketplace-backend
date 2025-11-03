@@ -1,8 +1,7 @@
 // db.js
 const { MongoClient } = require("mongodb");
 
-const uri = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_CLUSTER}/?appName=Cluster0`;
-// np. mongodb+srv://username:password@cluster0.mongodb.net/mydatabase?retryWrites=true&w=majority
+const uri = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_CLUSTER}/?appName=${process.env.MONGO_APP_NAME}`;
 
 const client = new MongoClient(uri);
 
