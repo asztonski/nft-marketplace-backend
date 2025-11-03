@@ -10,7 +10,7 @@ let db;
 async function connectDB() {
   try {
     await client.connect();
-    db = client.db(); // jeśli w URI nie podałeś nazwy DB, możesz dodać: client.db("nazwaDB")
+    db = client.db("nft");
     console.log("✅ Connected to MongoDB Atlas");
   } catch (err) {
     console.error("❌ MongoDB connection error:", err);
