@@ -2,6 +2,7 @@
 const express = require("express");
 const path = require("path");
 const app = express();
+const { connectDB, getDB } = require("./db");
 
 // use port from env (cPanel provides this) or fallback
 const port = process.env.PORT || 3000;
@@ -18,7 +19,7 @@ app.use((req, res, next) => {
 
 const cors = require("cors");
 
-const liveOrigin = "https://nft-marketplace-8d2b771c4c75.herokuapp.com/";
+const liveOrigin = process.env.LIVE_ORIGIN;
 
 // bezpieczniej: tylko Twojemu lokalnemu devowi i produkcji
 app.use(
@@ -52,12 +53,15 @@ app.get("/api/users", (req, res) => {
   res.json(sampleUsers);
 });
 
-// GET single user by id (e.g. /api/users/2)
-app.get("/api/users/:id", (req, res) => {
-  const id = Number(req.params.id);
-  const user = sampleUsers.find((u) => u.id === id);
-  if (!user) return res.status(404).json({ error: "User not found" });
-  res.json(user);
+app.get("/api/mongo-users", async (req, res) => {
+  try {
+    const db = getDB();
+    const users = await db.collection("users").find({}).toArray();
+    res.json(users);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "MongoDB error" });
+  }
 });
 
 // POST echo: returns the JSON body back to the client
@@ -84,6 +88,16 @@ app.use((req, res, next) => {
 app.use((err, req, res, next) => {
   console.error("Unhandled error:", err);
   res.status(500).json({ error: "Internal server error" });
+});
+
+connectDB().then(() => {
+  app.listen(port, () => {
+    console.log(
+      `App listening on port ${port} (NODE_ENV=${
+        process.env.NODE_ENV || "development"
+      })`
+    );
+  });
 });
 
 // start server
