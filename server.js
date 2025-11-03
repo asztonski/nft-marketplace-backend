@@ -53,17 +53,6 @@ app.get("/api/users", (req, res) => {
   res.json(sampleUsers);
 });
 
-app.get("/api/mongo-users", async (req, res) => {
-  try {
-    const db = getDB();
-    const users = await db.collection("users").find({}).toArray();
-    res.json(users);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "MongoDB error" });
-  }
-});
-
 // POST echo: returns the JSON body back to the client
 app.post("/api/echo", (req, res) => {
   // returns whatever JSON was sent
@@ -98,6 +87,17 @@ connectDB().then(() => {
       })`
     );
   });
+});
+
+app.get("/api/mongo-users", async (req, res) => {
+  try {
+    const db = getDB();
+    const users = await db.collection("users").find({}).toArray();
+    res.json(users);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "MongoDB error" });
+  }
 });
 
 // start server
