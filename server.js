@@ -18,7 +18,6 @@ app.use((req, res, next) => {
 });
 
 const cors = require("cors");
-
 const liveOrigin = process.env.LIVE_ORIGIN;
 
 // bezpieczniej: tylko Twojemu lokalnemu devowi i produkcji
@@ -55,7 +54,6 @@ app.get("/api/users", (req, res) => {
 
 // POST echo: returns the JSON body back to the client
 app.post("/api/echo", (req, res) => {
-  // returns whatever JSON was sent
   res.json({ received: req.body });
 });
 
@@ -64,21 +62,8 @@ app.get("/health", (req, res) => {
   res.json({ status: "ok", uptime: process.uptime() });
 });
 
-// 404 handler for unknown API routes
-app.use((req, res, next) => {
-  if (req.path.startsWith("/api/")) {
-    return res.status(404).json({ error: "Not found" });
-  }
-  // otherwise proceed to default static fallback (if any)
-  next();
-});
-
-// error handler - must have 4 args
-app.use((err, req, res, next) => {
-  console.error("Unhandled error:", err);
-  res.status(500).json({ error: "Internal server error" });
-});
-
+// --- MongoDB endpoint ---
+// MUSI BYĆ PRZED 404 middleware
 app.get("/api/mongo-users", async (req, res) => {
   try {
     const db = getDB();
@@ -90,7 +75,21 @@ app.get("/api/mongo-users", async (req, res) => {
   }
 });
 
-// start server
+// 404 handler for unknown API routes
+app.use((req, res, next) => {
+  if (req.path.startsWith("/api/")) {
+    return res.status(404).json({ error: "Not found" });
+  }
+  next();
+});
+
+// error handler - must have 4 args
+app.use((err, req, res, next) => {
+  console.error("Unhandled error:", err);
+  res.status(500).json({ error: "Internal server error" });
+});
+
+// start server AFTER connecting to MongoDB
 connectDB().then(() => {
   app.listen(port, () => {
     console.log(
