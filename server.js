@@ -79,16 +79,6 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: "Internal server error" });
 });
 
-connectDB().then(() => {
-  app.listen(port, () => {
-    console.log(
-      `App listening on port ${port} (NODE_ENV=${
-        process.env.NODE_ENV || "development"
-      })`
-    );
-  });
-});
-
 app.get("/api/mongo-users", async (req, res) => {
   try {
     const db = getDB();
@@ -101,10 +91,12 @@ app.get("/api/mongo-users", async (req, res) => {
 });
 
 // start server
-app.listen(port, () => {
-  console.log(
-    `App listening on port ${port} (NODE_ENV=${
-      process.env.NODE_ENV || "development"
-    })`
-  );
+connectDB().then(() => {
+  app.listen(port, () => {
+    console.log(
+      `App listening on port ${port} (NODE_ENV=${
+        process.env.NODE_ENV || "development"
+      })`
+    );
+  });
 });
