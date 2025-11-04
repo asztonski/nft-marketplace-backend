@@ -1,5 +1,5 @@
 // services/userService.js
-const User = require("../models/user");
+const User = require("../models/User");
 const { getDB } = require("../db"); // Keep for legacy data access
 
 class UserService {
