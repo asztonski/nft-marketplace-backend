@@ -1,145 +1,101 @@
 // server.js
 const express = require("express");
+const path = require("path");
 const app = express();
-const { connectDB } = require("./db");
-const { connectDB: connectMongoose } = require("./db-mongoose");
-const UserService = require("./services/userService");
+const { connectDB, getDB } = require("./db");
 
+// use port from env (cPanel provides this) or fallback
 const port = process.env.PORT || 3000;
 
-// Middleware
-app.use(express.json());
+// --- Middleware ---
+app.use(express.json()); // parse JSON bodies
+app.use(express.urlencoded({ extended: true })); // parse urlencoded bodies
 
-// CORS middleware to allow frontend requests
+// simple request logger
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-  );
-
-  if (req.method === "OPTIONS") {
-    res.sendStatus(200);
-  } else {
-    next();
-  }
+  console.log(`${new Date().toISOString()} ${req.method} ${req.url}`);
+  next();
 });
 
-// --- User endpoints (using Mongoose) ---
-app.get("/api/users", async (req, res) => {
+const cors = require("cors");
+const liveOrigin = process.env.LIVE_ORIGIN;
+
+// bezpieczniej: tylko Twojemu lokalnemu devowi i produkcji
+app.use(
+  cors({
+    origin: ["http://localhost:3000", liveOrigin],
+  })
+);
+
+// serve static files from ./public (e.g. public/index.html)
+app.use(express.static(path.join(__dirname, "public")));
+
+// --- Routes ---
+
+// root: original hello world (still served)
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
+
+// JSON API: current server time
+app.get("/api/time", (req, res) => {
+  res.json({ now: new Date().toISOString() });
+});
+
+// JSON API: sample users list
+const sampleUsers = [
+  { id: 1, name: "Alicja" },
+  { id: 2, name: "Bartek" },
+  { id: 3, name: "Celina" },
+];
+app.get("/api/users", (req, res) => {
+  res.json(sampleUsers);
+});
+
+// POST echo: returns the JSON body back to the client
+app.post("/api/echo", (req, res) => {
+  res.json({ received: req.body });
+});
+
+// simple health check for load balancers / monitoring
+app.get("/health", (req, res) => {
+  res.json({ status: "ok", uptime: process.uptime() });
+});
+
+// --- MongoDB endpoint ---
+// MUSI BYĆ PRZED 404 middleware
+app.get("/api/mongo-users", async (req, res) => {
   try {
-    const users = await UserService.getAllUsers();
+    const db = getDB();
+    const users = await db.collection("users").find({}).toArray();
     res.json(users);
   } catch (err) {
-    console.error("Error fetching users:", err);
-    res.status(500).json({ error: "Failed to fetch users" });
+    console.error(err);
+    res.status(500).json({ error: "MongoDB error" });
   }
 });
 
-// Add new user endpoint (using Mongoose)
-app.post("/api/users", async (req, res) => {
-  try {
-    const { id, email, password, avatar } = req.body;
-
-    // Validate required fields
-    if (!id || !email || !password) {
-      return res.status(400).json({
-        error: "Missing required fields: id, email, and password are required",
-      });
-    }
-
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({
-        error: "Invalid email format",
-      });
-    }
-
-    const newUser = await UserService.addUser({ id, email, password, avatar });
-
-    res.status(201).json({
-      message: "User added successfully",
-      userId: newUser.id,
-      user: {
-        id: newUser.id,
-        email: newUser.email,
-        avatar: newUser.avatar,
-        createdAt: newUser.createdAt,
-        updatedAt: newUser.updatedAt,
-      },
-    });
-  } catch (err) {
-    console.error("Error adding user:", err);
-
-    if (err.message.includes("already exists")) {
-      return res.status(409).json({ error: err.message });
-    }
-
-    if (err.name === "ValidationError") {
-      return res.status(400).json({ error: err.message });
-    }
-
-    res.status(500).json({ error: "Internal server error" });
+// 404 handler for unknown API routes
+app.use((req, res, next) => {
+  if (req.path.startsWith("/api/")) {
+    return res.status(404).json({ error: "Not found" });
   }
+  next();
 });
 
-// Get user by ID endpoint
-app.get("/api/users/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const user = await UserService.findUserById(id);
-
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    // Don't return password in the response
-    const { password, ...userWithoutPassword } = user.toObject
-      ? user.toObject()
-      : user;
-    res.json(userWithoutPassword);
-  } catch (err) {
-    console.error("Error fetching user:", err);
-    res.status(500).json({ error: "Failed to fetch user" });
-  }
-});
-
-// Migration endpoint - optional, for migrating legacy data
-app.post("/api/migrate-users", async (req, res) => {
-  try {
-    const result = await UserService.migrateUsersToNewStructure();
-    res.json({
-      message: "Migration completed",
-      ...result,
-    });
-  } catch (err) {
-    console.error("Migration error:", err);
-    res.status(500).json({ error: "Migration failed" });
-  }
-});
-
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({ error: "Not found" });
-});
-
-// error handler
+// error handler - must have 4 args
 app.use((err, req, res, next) => {
   console.error("Unhandled error:", err);
   res.status(500).json({ error: "Internal server error" });
 });
 
-// start server AFTER connecting to both MongoDB and Mongoose
-Promise.all([connectDB(), connectMongoose()])
-  .then(() => {
-    app.listen(port, () => {
-      console.log(`App listening on port ${port}`);
-      console.log("🚀 Server ready with Mongoose integration");
-    });
-  })
-  .catch((err) => {
-    console.error("Failed to connect to database:", err);
-    process.exit(1);
+// start server AFTER connecting to MongoDB
+connectDB().then(() => {
+  app.listen(port, () => {
+    console.log(
+      `App listening on port ${port} (NODE_ENV=${
+        process.env.NODE_ENV || "development"
+      })`
+    );
   });
+});
