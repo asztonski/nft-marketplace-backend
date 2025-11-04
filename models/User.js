@@ -1,10 +1,42 @@
 const mongoose = require("mongoose");
 
-const userSchema = new mongoose.Schema({
-  id: { type: String, required: true, unique: true }, // username
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  avatar: { type: String, default: "" },
-});
+const userSchema = new mongoose.Schema(
+  {
+    id: {
+      type: String,
+      required: [true, "User ID is required"],
+      unique: true,
+      trim: true,
+      minlength: [3, "User ID must be at least 3 characters long"],
+      maxlength: [30, "User ID must be less than 30 characters"],
+    },
+    email: {
+      type: String,
+      required: [true, "Email is required"],
+      unique: true,
+      trim: true,
+      lowercase: true,
+      match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Please enter a valid email"],
+    },
+    password: {
+      type: String,
+      required: [true, "Password is required"],
+      minlength: [4, "Password must be at least 4 characters long"],
+    },
+    avatar: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+  },
+  {
+    timestamps: true, // Automatically adds createdAt and updatedAt fields
+    collection: "users_new", // Use a different collection name to avoid conflicts with legacy data
+  }
+);
+
+// Index for better performance
+userSchema.index({ id: 1 });
+userSchema.index({ email: 1 });
 
 module.exports = mongoose.model("User", userSchema);
