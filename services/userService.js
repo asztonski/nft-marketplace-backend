@@ -103,6 +103,38 @@ class UserService {
     }
   }
 
+  // Find user by email - checks both structures
+  static async findUserByEmail(email) {
+    try {
+      // First check new structure
+      const mongooseUser = await User.findOne({ email: email });
+      if (mongooseUser) {
+        return mongooseUser;
+      }
+
+      // Check legacy structure
+      const db = getDB();
+      const usersCollection = db.collection("users");
+      const usersDoc = await usersCollection.findOne({});
+
+      if (usersDoc && usersDoc.users) {
+        const legacyUser = usersDoc.users.find((user) => user.email === email);
+        if (legacyUser) {
+          return legacyUser;
+        }
+      }
+
+      return null;
+    } catch (error) {
+      throw new Error(`Error finding user by email: ${error.message}`);
+    }
+  }
+
+  // Get user by email (alias for findUserByEmail)
+  static async getUserByEmail(email) {
+    return this.findUserByEmail(email);
+  }
+
   // Migration helper - move users from legacy structure to new structure
   static async migrateUsersToNewStructure() {
     try {
