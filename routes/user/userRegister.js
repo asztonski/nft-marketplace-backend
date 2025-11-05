@@ -1,3 +1,6 @@
+const bcrypt = require("bcrypt");
+const UserService = require("../../services/userService");
+
 const registerUser = async (req, res) => {
   try {
     const { id, email, password, avatar } = req.body;
@@ -17,7 +20,31 @@ const registerUser = async (req, res) => {
       });
     }
 
-    const newUser = await UserService.addUser({ id, email, password, avatar });
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({
+        error:
+          "Password must be at least 8 characters long and contain at least one letter and one number",
+      });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Check if user already exists
+    const existingUser = await UserService.getUserByEmail(email);
+    if (existingUser) {
+      return res.status(409).json({
+        error: "User with this email already exists",
+      });
+    }
+
+    const newUser = await UserService.addUser({
+      id,
+      email,
+      hashedPassword,
+      avatar,
+    });
 
     res.status(201).json({
       message: "User added successfully",
@@ -25,6 +52,7 @@ const registerUser = async (req, res) => {
       user: {
         id: newUser.id,
         email: newUser.email,
+        password: newUser.password,
         avatar: newUser.avatar,
         createdAt: newUser.createdAt,
         updatedAt: newUser.updatedAt,
