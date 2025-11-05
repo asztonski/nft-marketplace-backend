@@ -42,7 +42,7 @@ const registerUser = async (req, res) => {
     const newUser = await UserService.addUser({
       id,
       email,
-      hashedPassword,
+      password: hashedPassword,
       avatar,
     });
 
