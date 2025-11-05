@@ -1,4 +1,5 @@
-const UserService = require("../services/userService");
+const bcrypt = require("bcrypt");
+const UserService = require("../../services/userService");
 
 const loginUser = async (req, res) => {
   try {
@@ -11,16 +12,15 @@ const loginUser = async (req, res) => {
       });
     }
 
+    // Find user by email
     const user = await UserService.findUserByEmail(email);
 
     if (!user) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
 
-    const isPasswordValid = await UserService.comparePasswords(
-      password,
-      user.password
-    );
+    // Compare password with hashed password in database
+    const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
       return res.status(401).json({ error: "Invalid email or password" });
@@ -42,4 +42,3 @@ const loginUser = async (req, res) => {
 };
 
 module.exports = { loginUser };
-const UserService = require("../../services/userService");
