@@ -9,7 +9,7 @@ const getUserList = require("./routes/user/userList").getUsers;
 
 const port = process.env.PORT || 3000;
 
-// Middleware
+// Middleware to parse JSON bodies
 app.use(express.json());
 
 // CORS middleware to allow frontend requests
