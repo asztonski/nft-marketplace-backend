@@ -1,0 +1,45 @@
+const UserService = require("../services/userService");
+
+const loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Validate required fields
+    if (!email || !password) {
+      return res.status(400).json({
+        error: "Missing required fields: email and password are required",
+      });
+    }
+
+    const user = await UserService.findUserByEmail(email);
+
+    if (!user) {
+      return res.status(401).json({ error: "Invalid email or password" });
+    }
+
+    const isPasswordValid = await UserService.comparePasswords(
+      password,
+      user.password
+    );
+
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: "Invalid email or password" });
+    }
+
+    // Don't return password in the response
+    const { password: userPassword, ...userWithoutPassword } = user.toObject
+      ? user.toObject()
+      : user;
+
+    res.json({
+      message: "Login successful",
+      user: userWithoutPassword,
+    });
+  } catch (err) {
+    console.error("Error logging in user:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+module.exports = { loginUser };
+const UserService = require("../../services/userService");
