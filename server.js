@@ -6,6 +6,8 @@ const { connectDB } = require("./db");
 const { connectDB: connectMongoose } = require("./db-mongoose");
 const registerUser = require("./routes/user/userRegister").registerUser;
 const getUserList = require("./routes/user/userList").getUsers;
+const getUserProfile = require("./routes/user/userProfile").getUserProfile;
+const loginUser = require("./routes/user/userLogin").loginUser;
 
 const port = process.env.PORT || 3000;
 
