@@ -1,8 +1,56 @@
 // services/userService.js
 const User = require("../models/User");
 const { getDB } = require("../db"); // Keep for legacy data access
+const { nanoid } = require("nanoid");
 
 class UserService {
+  // Generate unique username with nanoid suffix if needed
+  static async generateUniqueUsername(desiredUsername) {
+    try {
+      // Clean the desired username (remove special characters, lowercase)
+      const cleanUsername = desiredUsername
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, "") // Remove special characters
+        .slice(0, 20); // Limit length
+
+      if (cleanUsername.length < 3) {
+        throw new Error(
+          "Username must be at least 3 characters long after cleaning"
+        );
+      }
+
+      // Check if basic username is available
+      const existingUser = await User.findOne({ username: cleanUsername });
+
+      if (!existingUser) {
+        return cleanUsername;
+      }
+
+      // If not available, generate with nanoid suffix
+      let attempts = 0;
+      const maxAttempts = 10;
+
+      while (attempts < maxAttempts) {
+        const suffix = nanoid(4); // 4-character suffix
+        const candidateUsername = `${cleanUsername}_${suffix}`;
+
+        const exists = await User.findOne({ username: candidateUsername });
+
+        if (!exists) {
+          return candidateUsername;
+        }
+
+        attempts++;
+      }
+
+      // Fallback - use timestamp
+      const timestamp = Date.now().toString().slice(-6);
+      return `${cleanUsername}_${timestamp}`;
+    } catch (error) {
+      throw new Error(`Error generating unique username: ${error.message}`);
+    }
+  }
+
   // Get all users - works with both legacy and new structure
   static async getAllUsers() {
     try {

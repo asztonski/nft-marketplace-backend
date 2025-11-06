@@ -3,10 +3,10 @@ const UserService = require("../../services/userService");
 
 const registerUser = async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { username: desiredUsername, email, password } = req.body;
 
     // Validate required fields
-    if (!username || !email || !password) {
+    if (!desiredUsername || !email || !password) {
       return res.status(400).json({
         error:
           "Missing required fields: username, email, and password are required",
@@ -29,26 +29,13 @@ const registerUser = async (req, res) => {
       });
     }
 
-    // Username regex: must start with an uppercase letter, followed by lowercase letters and numbers, 3-20 characters
-    const usernameRegex = /^[A-Z][a-z0-9]{2,19}$/;
-    if (!usernameRegex.test(username)) {
-      return res.status(400).json({
-        error:
-          "Invalid username format: must be 3-20 characters, start with an uppercase letter, and contain only lowercase letters and numbers",
-      });
-    }
+    // Generate unique username from desired username
+    const username = await UserService.generateUniqueUsername(desiredUsername);
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Check if user already exists
-    const existingUser = await UserService.getUserByEmail(email);
-    if (existingUser) {
-      return res.status(409).json({
-        error: "User with this email already exists",
-      });
-    }
-
+    // Create new user with generated unique username
     const newUser = await UserService.addUser({
       username,
       email,
@@ -58,10 +45,16 @@ const registerUser = async (req, res) => {
     res.status(201).json({
       message: "User added successfully",
       username: newUser.username,
+      desiredUsername: desiredUsername,
+      isUsernameModified:
+        newUser.username !==
+        desiredUsername
+          .toLowerCase()
+          .replace(/[^a-z0-9]/g, "")
+          .slice(0, 20),
       user: {
         username: newUser.username,
         email: newUser.email,
-        password: newUser.password,
         createdAt: newUser.createdAt,
         updatedAt: newUser.updatedAt,
       },
