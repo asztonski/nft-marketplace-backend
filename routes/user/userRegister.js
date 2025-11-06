@@ -52,7 +52,6 @@ const registerUser = async (req, res) => {
       id,
       email,
       password: hashedPassword,
-      avatar,
     });
 
     res.status(201).json({
@@ -62,7 +61,6 @@ const registerUser = async (req, res) => {
         id: newUser.id,
         email: newUser.email,
         password: newUser.password,
-        avatar: newUser.avatar,
         createdAt: newUser.createdAt,
         updatedAt: newUser.updatedAt,
       },

@@ -30,7 +30,7 @@ class UserService {
 
   // Add new user - uses Mongoose model (new structure)
   static async addUser(userData) {
-    const { id, email, password, avatar = "" } = userData;
+    const { id, email, password } = userData;
 
     try {
       // Check if user already exists in new structure
@@ -62,7 +62,6 @@ class UserService {
         id,
         email,
         password,
-        avatar,
       });
 
       const savedUser = await newUser.save();
