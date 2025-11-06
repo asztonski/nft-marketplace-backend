@@ -163,7 +163,7 @@ class UserService {
             id: userData.id,
             email: userData.email,
             password: userData.password,
-            avatar: userData.avatar || "",
+            // avatar: userData.avatar || "",
           });
 
           await newUser.save();
