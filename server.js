@@ -9,6 +9,7 @@ const getUserList = require("./routes/user/userList").getUsers;
 const getUserProfile = require("./routes/user/userProfile").getUserProfile;
 const loginUser = require("./routes/user/userLogin").loginUser;
 const { deleteUserAccount } = require("./routes/user/userDelete");
+const { authenticateToken } = require("./middleware/auth");
 
 const port = process.env.PORT || 3000;
 
@@ -41,8 +42,8 @@ app.get("/api/users/:username", getUserProfile);
 app.post("/auth/login", loginUser);
 // USER REGISTRATION
 app.post("/auth/register", registerUser);
-// DELETE OWN ACCOUNT (secure endpoint)
-app.delete("/api/users/me", deleteUserAccount);
+// DELETE OWN ACCOUNT (secure endpoint with JWT authentication)
+app.delete("/api/users/me", authenticateToken, deleteUserAccount);
 
 // 404 handler
 app.use((req, res) => {

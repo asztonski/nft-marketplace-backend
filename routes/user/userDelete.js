@@ -1,48 +1,37 @@
 const UserService = require("../../services/userService");
-const bcrypt = require("bcrypt");
 
 // Delete own account (secure endpoint for logged-in users)
 const deleteUserAccount = async (req, res) => {
   try {
-    const { password, email } = req.body;
+    const { confirmText } = req.body;
 
-    // For now, we'll use email from body until JWT auth is implemented
-    // TODO: Replace with user ID from JWT token when auth is implemented
+    // User info is available from JWT token (via auth middleware)
+    const { username, email } = req.user;
 
-    if (!email || !password) {
+    console.log("Deleting user:", { username, email }); // Debug log
+
+    // Require confirmation text for extra security
+    if (confirmText !== "DELETE MY ACCOUNT") {
       return res.status(400).json({
-        message: "Email and password are required",
+        message: "Please type 'DELETE MY ACCOUNT' to confirm",
       });
     }
 
-    // Optional: Require confirmation text for extra security
-    // if (confirmText !== "DELETE MY ACCOUNT") {
-    //   return res.status(400).json({
-    //     message: "Please type 'DELETE MY ACCOUNT' to confirm",
-    //   });
-    // }
-
-    // Find user by email
-    const user = await UserService.findUserByEmail(email);
+    // Find user to make sure they still exist
+    const user = await UserService.findUserByUsername(username);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Verify password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(401).json({ message: "Invalid password" });
-    }
-
-    // Delete the account
-    const deletedUser = await UserService.deleteUser(user.username);
+    // Delete the account using username from token
+    const deletedUser = await UserService.deleteUser(username);
     if (!deletedUser) {
       return res.status(404).json({ message: "Failed to delete account" });
     }
 
     res.json({
       message: "Account deleted successfully",
-      deletedUsername: deletedUser.username,
+      deletedUsername: deletedUser.username || username,
     });
   } catch (error) {
     console.error("Error deleting own account:", error);

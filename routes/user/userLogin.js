@@ -1,5 +1,6 @@
 const bcrypt = require("bcrypt");
 const UserService = require("../../services/userService");
+const { generateToken } = require("../../middleware/auth");
 
 const loginUser = async (req, res) => {
   try {
@@ -26,6 +27,9 @@ const loginUser = async (req, res) => {
       return res.status(401).json({ error: "Invalid email or password" });
     }
 
+    // Generate JWT token
+    const token = generateToken(user);
+
     // Don't return password in the response
     const { password: userPassword, ...userWithoutPassword } = user.toObject
       ? user.toObject()
@@ -33,6 +37,7 @@ const loginUser = async (req, res) => {
 
     res.json({
       message: "Login successful",
+      token: token,
       user: userWithoutPassword,
     });
   } catch (err) {
