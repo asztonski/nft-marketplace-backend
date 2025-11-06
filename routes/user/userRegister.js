@@ -28,12 +28,12 @@ const registerUser = async (req, res) => {
       });
     }
 
-    // ID regex: only lowercase letters and numbers, must contain at least one letter, 3-20 characters
-    const idRegex = /^(?=.*[a-z])[a-z0-9]{3,20}$/;
+    // ID regex: must start with an uppercase letter, followed by lowercase letters and numbers, 3-20 characters
+    const idRegex = /^[A-Z][a-z0-9]{2,19}$/;
     if (!idRegex.test(id)) {
       return res.status(400).json({
         error:
-          "Invalid id format: must be 3-20 characters, lowercase letters and numbers only, and contain at least one letter",
+          "Invalid id format: must be 3-20 characters, start with an uppercase letter, and contain only lowercase letters and numbers",
       });
     }
 
