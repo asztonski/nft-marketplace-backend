@@ -4,7 +4,7 @@ const bcrypt = require("bcrypt");
 // Delete own account (secure endpoint for logged-in users)
 const deleteUserAccount = async (req, res) => {
   try {
-    const { password, confirmText } = req.body;
+    const { password } = req.body;
 
     // For now, we'll use email from body until JWT auth is implemented
     // TODO: Replace with user ID from JWT token when auth is implemented
@@ -17,11 +17,11 @@ const deleteUserAccount = async (req, res) => {
     }
 
     // Optional: Require confirmation text for extra security
-    if (confirmText !== "DELETE MY ACCOUNT") {
-      return res.status(400).json({
-        message: "Please type 'DELETE MY ACCOUNT' to confirm",
-      });
-    }
+    // if (confirmText !== "DELETE MY ACCOUNT") {
+    //   return res.status(400).json({
+    //     message: "Please type 'DELETE MY ACCOUNT' to confirm",
+    //   });
+    // }
 
     // Find user by email
     const user = await UserService.findUserByEmail(email);
