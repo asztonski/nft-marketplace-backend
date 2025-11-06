@@ -75,6 +75,53 @@ class UserService {
     }
   }
 
+  static async updateUser(userId, updateData) {
+    try {
+      const updatedUser = await User.findOneAndUpdate(
+        { id: userId },
+        updateData,
+        { new: true }
+      );
+
+      return updatedUser;
+    } catch (error) {
+      throw new Error(`Error updating user: ${error.message}`);
+    }
+  }
+
+  // Delete user - checks both structures
+  static async deleteUser(userId) {
+    try {
+      // First try to delete from new structure
+      const deletedUser = await User.findOneAndDelete({ id: userId });
+      if (deletedUser) {
+        return deletedUser;
+      }
+
+      // If not found, check legacy structure
+      const db = getDB();
+      const usersCollection = db.collection("users");
+      const usersDoc = await usersCollection.findOne({});
+
+      if (usersDoc && usersDoc.users) {
+        const legacyUser = usersDoc.users.find((user) => user.id === userId);
+        if (legacyUser) {
+          // Remove user from legacy array
+          usersDoc.users = usersDoc.users.filter((user) => user.id !== userId);
+          await usersCollection.updateOne(
+            {},
+            { $set: { users: usersDoc.users } }
+          );
+          return legacyUser;
+        }
+      }
+
+      return null;
+    } catch (error) {
+      throw new Error(`Error deleting user: ${error.message}`);
+    }
+  }
+
   // Find user by id - checks both structures
   static async findUserById(userId) {
     try {

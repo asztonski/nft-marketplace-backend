@@ -40,6 +40,8 @@ app.get("/api/users/:id", getUserProfile);
 app.post("/auth/login", loginUser);
 // USER REGISTRATION
 app.post("/auth/register", registerUser);
+// USER DELETION
+app.delete("/api/users/:id", deleteUser);
 
 // 404 handler
 app.use((req, res) => {
