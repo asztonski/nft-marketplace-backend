@@ -2,13 +2,13 @@ const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
   {
-    id: {
+    username: {
       type: String,
-      required: [true, "User ID is required"],
+      required: [true, "Username is required"],
       unique: true,
       trim: true,
-      minlength: [3, "User ID must be at least 3 characters long"],
-      maxlength: [30, "User ID must be less than 30 characters"],
+      minlength: [3, "Username must be at least 3 characters long"],
+      maxlength: [30, "Username must be less than 30 characters"],
     },
     email: {
       type: String,
@@ -36,7 +36,7 @@ const userSchema = new mongoose.Schema(
 );
 
 // Index for better performance
-userSchema.index({ id: 1 });
+userSchema.index({ username: 1 });
 userSchema.index({ email: 1 });
 
 module.exports = mongoose.model("User", userSchema);

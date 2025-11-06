@@ -3,12 +3,13 @@ const UserService = require("../../services/userService");
 
 const registerUser = async (req, res) => {
   try {
-    const { id, email, password } = req.body;
+    const { username, email, password } = req.body;
 
     // Validate required fields
-    if (!id || !email || !password) {
+    if (!username || !email || !password) {
       return res.status(400).json({
-        error: "Missing required fields: id, email, and password are required",
+        error:
+          "Missing required fields: username, email, and password are required",
       });
     }
 
@@ -28,12 +29,12 @@ const registerUser = async (req, res) => {
       });
     }
 
-    // ID regex: must start with an uppercase letter, followed by lowercase letters and numbers, 3-20 characters
-    const idRegex = /^[A-Z][a-z0-9]{2,19}$/;
-    if (!idRegex.test(id)) {
+    // Username regex: must start with an uppercase letter, followed by lowercase letters and numbers, 3-20 characters
+    const usernameRegex = /^[A-Z][a-z0-9]{2,19}$/;
+    if (!usernameRegex.test(username)) {
       return res.status(400).json({
         error:
-          "Invalid id format: must be 3-20 characters, start with an uppercase letter, and contain only lowercase letters and numbers",
+          "Invalid username format: must be 3-20 characters, start with an uppercase letter, and contain only lowercase letters and numbers",
       });
     }
 
@@ -49,16 +50,16 @@ const registerUser = async (req, res) => {
     }
 
     const newUser = await UserService.addUser({
-      id,
+      username,
       email,
       password: hashedPassword,
     });
 
     res.status(201).json({
       message: "User added successfully",
-      userId: newUser.id,
+      username: newUser.username,
       user: {
-        id: newUser.id,
+        username: newUser.username,
         email: newUser.email,
         password: newUser.password,
         createdAt: newUser.createdAt,

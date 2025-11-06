@@ -2,8 +2,8 @@ const UserService = require("../../services/userService");
 
 const getUserProfile = async (req, res) => {
   try {
-    const userId = req.params.id;
-    const user = await UserService.getUserById(userId);
+    const username = req.params.username;
+    const user = await UserService.findUserByUsername(username);
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });

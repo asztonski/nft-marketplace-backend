@@ -8,6 +8,7 @@ const registerUser = require("./routes/user/userRegister").registerUser;
 const getUserList = require("./routes/user/userList").getUsers;
 const getUserProfile = require("./routes/user/userProfile").getUserProfile;
 const loginUser = require("./routes/user/userLogin").loginUser;
+const deleteUser = require("./routes/user/userDelate").deleteUser;
 
 const port = process.env.PORT || 3000;
 
@@ -35,13 +36,13 @@ app.use((req, res, next) => {
 // GET USER LIST
 app.get("/api/users", getUserList);
 // GET USER PROFILE
-app.get("/api/users/:id", getUserProfile);
+app.get("/api/users/:username", getUserProfile);
 // USER LOGIN
 app.post("/auth/login", loginUser);
 // USER REGISTRATION
 app.post("/auth/register", registerUser);
-// USER DELETION
-app.delete("/api/users/:id", deleteUser);
+// USER DELETION (own account only)
+app.delete("/api/users/:username", deleteUser);
 
 // 404 handler
 app.use((req, res) => {

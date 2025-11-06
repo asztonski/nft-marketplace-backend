@@ -2,8 +2,8 @@ const UserService = require("../../services/userService");
 
 const deleteUser = async (req, res) => {
   try {
-    const userId = req.params.id;
-    const deletedUser = await UserService.deleteUser(userId);
+    const username = req.params.username;
+    const deletedUser = await UserService.deleteUser(username);
     if (!deletedUser) {
       return res.status(404).json({ message: "User not found" });
     }

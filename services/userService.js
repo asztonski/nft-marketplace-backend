@@ -30,16 +30,16 @@ class UserService {
 
   // Add new user - uses Mongoose model (new structure)
   static async addUser(userData) {
-    const { id, email, password } = userData;
+    const { username, email, password } = userData;
 
     try {
       // Check if user already exists in new structure
       const existingUser = await User.findOne({
-        $or: [{ id: id }, { email: email }],
+        $or: [{ username: username }, { email: email }],
       });
 
       if (existingUser) {
-        throw new Error("User already exists with this id or email");
+        throw new Error("User already exists with this username or email");
       }
 
       // Check if user exists in legacy structure
@@ -49,17 +49,17 @@ class UserService {
 
       if (usersDoc && usersDoc.users) {
         const legacyUser = usersDoc.users.find(
-          (user) => user.id === id || user.email === email
+          (user) => user.username === username || user.email === email
         );
 
         if (legacyUser) {
-          throw new Error("User already exists with this id or email");
+          throw new Error("User already exists with this username or email");
         }
       }
 
       // Create new user using Mongoose model
       const newUser = new User({
-        id,
+        username,
         email,
         password,
       });
@@ -69,16 +69,16 @@ class UserService {
     } catch (error) {
       if (error.code === 11000) {
         // MongoDB duplicate key error
-        throw new Error("User already exists with this id or email");
+        throw new Error("User already exists with this username or email");
       }
       throw error;
     }
   }
 
-  static async updateUser(userId, updateData) {
+  static async updateUser(username, updateData) {
     try {
       const updatedUser = await User.findOneAndUpdate(
-        { id: userId },
+        { username: username },
         updateData,
         { new: true }
       );
@@ -90,10 +90,10 @@ class UserService {
   }
 
   // Delete user - checks both structures
-  static async deleteUser(userId) {
+  static async deleteUser(username) {
     try {
       // First try to delete from new structure
-      const deletedUser = await User.findOneAndDelete({ id: userId });
+      const deletedUser = await User.findOneAndDelete({ username: username });
       if (deletedUser) {
         return deletedUser;
       }
@@ -104,10 +104,14 @@ class UserService {
       const usersDoc = await usersCollection.findOne({});
 
       if (usersDoc && usersDoc.users) {
-        const legacyUser = usersDoc.users.find((user) => user.id === userId);
+        const legacyUser = usersDoc.users.find(
+          (user) => user.username === username
+        );
         if (legacyUser) {
           // Remove user from legacy array
-          usersDoc.users = usersDoc.users.filter((user) => user.id !== userId);
+          usersDoc.users = usersDoc.users.filter(
+            (user) => user.username !== username
+          );
           await usersCollection.updateOne(
             {},
             { $set: { users: usersDoc.users } }
@@ -122,11 +126,11 @@ class UserService {
     }
   }
 
-  // Find user by id - checks both structures
-  static async findUserById(userId) {
+  // Find user by username - checks both structures
+  static async findUserByUsername(username) {
     try {
       // First check new structure
-      const mongooseUser = await User.findOne({ id: userId });
+      const mongooseUser = await User.findOne({ username: username });
       if (mongooseUser) {
         return mongooseUser;
       }
@@ -137,7 +141,9 @@ class UserService {
       const usersDoc = await usersCollection.findOne({});
 
       if (usersDoc && usersDoc.users) {
-        const legacyUser = usersDoc.users.find((user) => user.id === userId);
+        const legacyUser = usersDoc.users.find(
+          (user) => user.username === username
+        );
         if (legacyUser) {
           return legacyUser;
         }
@@ -181,6 +187,15 @@ class UserService {
     return this.findUserByEmail(email);
   }
 
+  // Alias methods for backward compatibility
+  static async getUserById(username) {
+    return this.findUserByUsername(username);
+  }
+
+  static async getUserByUsername(username) {
+    return this.findUserByUsername(username);
+  }
+
   // Migration helper - move users from legacy structure to new structure
   static async migrateUsersToNewStructure() {
     try {
@@ -199,7 +214,9 @@ class UserService {
       for (const userData of usersDoc.users) {
         try {
           // Check if user already exists in new structure
-          const existingUser = await User.findOne({ id: userData.id });
+          const existingUser = await User.findOne({
+            username: userData.username,
+          });
           if (existingUser) {
             skipped++;
             continue;
@@ -207,7 +224,7 @@ class UserService {
 
           // Create new user document
           const newUser = new User({
-            id: userData.id,
+            username: userData.username,
             email: userData.email,
             password: userData.password,
             // avatar: userData.avatar || "",
@@ -216,7 +233,10 @@ class UserService {
           await newUser.save();
           migrated++;
         } catch (error) {
-          console.error(`Error migrating user ${userData.id}:`, error.message);
+          console.error(
+            `Error migrating user ${userData.username}:`,
+            error.message
+          );
           skipped++;
         }
       }
