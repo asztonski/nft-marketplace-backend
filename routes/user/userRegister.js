@@ -3,7 +3,7 @@ const UserService = require("../../services/userService");
 
 const registerUser = async (req, res) => {
   try {
-    const { id, email, password, avatar } = req.body;
+    const { id, email, password } = req.body;
 
     // Validate required fields
     if (!id || !email || !password) {
