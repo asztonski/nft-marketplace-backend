@@ -31,7 +31,7 @@ const userSchema = new mongoose.Schema(
   },
   {
     timestamps: true, // Automatically adds createdAt and updatedAt fields
-    collection: "users_new", // Use a different collection name to avoid conflicts with legacy data
+    collection: "users", // Use a different collection name to avoid conflicts with legacy data
   }
 );
 
