@@ -87,7 +87,7 @@ class UserService {
       });
 
       if (existingUser) {
-        throw new Error("User already exists with this username or email");
+        throw new Error("This email is already used!");
       }
 
       // Check if user exists in legacy structure
@@ -96,12 +96,10 @@ class UserService {
       const usersDoc = await usersCollection.findOne({});
 
       if (usersDoc && usersDoc.users) {
-        const legacyUser = usersDoc.users.find(
-          (user) => user.username === username || user.email === email
-        );
+        const legacyUser = usersDoc.users.find((user) => user.email === email);
 
         if (legacyUser) {
-          throw new Error("User already exists with this username or email");
+          throw new Error("This email is already used!");
         }
       }
 
@@ -117,7 +115,7 @@ class UserService {
     } catch (error) {
       if (error.code === 11000) {
         // MongoDB duplicate key error
-        throw new Error("User already exists with this username or email");
+        throw new Error("This email is already used!");
       }
       throw error;
     }
