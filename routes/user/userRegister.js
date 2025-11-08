@@ -55,6 +55,7 @@ const registerUser = async (req, res) => {
       user: {
         username: newUser.username,
         email: newUser.email,
+        isActivated: newUser.isActivated,
         createdAt: newUser.createdAt,
         updatedAt: newUser.updatedAt,
       },

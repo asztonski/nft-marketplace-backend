@@ -23,6 +23,10 @@ const userSchema = new mongoose.Schema(
       required: [true, "Password is required"],
       minlength: [4, "Password must be at least 4 characters long"],
     },
+    isActivated: {
+      type: Boolean,
+      default: false,
+    },
     // avatar: {
     //   type: String,
     //   default: "",
