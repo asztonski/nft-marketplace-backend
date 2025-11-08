@@ -62,8 +62,10 @@ const registerUser = async (req, res) => {
     });
   } catch (err) {
     console.error("Error adding user:", err);
-
-    if (err.message.includes("already exists")) {
+    if (
+      err.message.includes("already used") ||
+      err.message.includes("already exists")
+    ) {
       return res.status(409).json({ error: err.message });
     }
 
