@@ -1,6 +1,8 @@
 // server.js
 require("dotenv").config();
 const express = require("express");
+const { graphqlHTTP } = require("express-graphql");
+const { schema, root } = require("./middleware/graphql");
 const app = express();
 const { connectDB } = require("./db");
 const { connectDB: connectMongoose } = require("./db-mongoose");
@@ -10,6 +12,8 @@ const getUserProfile = require("./routes/user/userProfile").getUserProfile;
 const loginUser = require("./routes/user/userLogin").loginUser;
 const { deleteUserAccount } = require("./routes/user/userDelete");
 const { authenticateToken } = require("./middleware/auth");
+
+// ...existing code...
 
 const port = process.env.PORT || 3000;
 
@@ -31,6 +35,15 @@ app.use((req, res, next) => {
     next();
   }
 });
+
+app.use(
+  "/graphql",
+  graphqlHTTP({
+    schema: schema,
+    rootValue: root,
+    graphiql: true, // Włącza GraphiQL interface
+  })
+);
 
 // Routes
 
