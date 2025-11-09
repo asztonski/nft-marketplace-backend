@@ -118,6 +118,58 @@ class UserService {
     }
   }
 
+  /**
+   * FIND USER BY EMAIL FOR LOGIN (includes sensitive fields)
+   * @param {string} email - Email to search for
+   * @returns {Promise<Object|null>} - User object with login attempts data or null if not found
+   */
+  static async findUserForLogin(email) {
+    try {
+      return await UserRepository.findByEmailForLogin(email);
+    } catch (error) {
+      throw new Error(`Error finding user for login: ${error.message}`);
+    }
+  }
+
+  /**
+   * HANDLE FAILED LOGIN ATTEMPT
+   * @param {Object} user - User object
+   * @returns {Promise<void>}
+   */
+  static async handleFailedLogin(user) {
+    try {
+      if (user.incrementLoginAttempts) {
+        await user.incrementLoginAttempts();
+      }
+    } catch (error) {
+      throw new Error(`Error handling failed login: ${error.message}`);
+    }
+  }
+
+  /**
+   * HANDLE SUCCESSFUL LOGIN
+   * @param {Object} user - User object
+   * @returns {Promise<void>}
+   */
+  static async handleSuccessfulLogin(user) {
+    try {
+      if (user.resetLoginAttempts) {
+        await user.resetLoginAttempts();
+      }
+    } catch (error) {
+      throw new Error(`Error handling successful login: ${error.message}`);
+    }
+  }
+
+  /**
+   * CHECK IF USER ACCOUNT IS LOCKED
+   * @param {Object} user - User object
+   * @returns {boolean} - True if account is locked
+   */
+  static isAccountLocked(user) {
+    return user.isLocked || (user.lockUntil && user.lockUntil > Date.now());
+  }
+
   // ========================================
   // ALIAS METHODS FOR BACKWARD COMPATIBILITY
   // ========================================
