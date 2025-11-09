@@ -3,7 +3,7 @@ const User = require("../../models/User");
 const { getDB } = require("../../db");
 
 /**
- * UserRepository - Module responsible for data access operations
+ * USER REPOSITORY - MODULE RESPONSIBLE FOR DATA ACCESS
  * Handles CRUD operations for users in both new and legacy structures
  */
 class UserRepository {
@@ -34,8 +34,8 @@ class UserRepository {
    */
   static async findByEmail(email) {
     try {
-      // First check new structure (Mongoose)
-      const mongooseUser = await User.findOne({ email: email });
+      // First check new structure (Mongoose) - without sensitive fields for general use
+      const mongooseUser = await User.findOne({ email: email }).exec();
       if (mongooseUser) {
         return mongooseUser;
       }
@@ -44,6 +44,31 @@ class UserRepository {
       return await this.findInLegacyStructure({ email });
     } catch (error) {
       throw new Error(`Error finding user by email: ${error.message}`);
+    }
+  }
+
+  /**
+   * Find user by email for login (includes sensitive fields like loginAttempts)
+   * @param {string} email - Email to search for
+   * @returns {Promise<Object|null>} - User object or null if not found
+   */
+  static async findByEmailForLogin(email) {
+    try {
+      // First check new structure (Mongoose) with sensitive fields
+      const mongooseUser = await User.findOne({ email: email })
+        .select("+loginAttempts +lockUntil")
+        .exec();
+
+      if (mongooseUser) {
+        return mongooseUser;
+      }
+
+      // Check legacy structure (legacy users don't have login attempts tracking)
+      return await this.findInLegacyStructure({ email });
+    } catch (error) {
+      throw new Error(
+        `Error finding user by email for login: ${error.message}`
+      );
     }
   }
 
