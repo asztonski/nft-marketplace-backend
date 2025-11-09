@@ -46,6 +46,39 @@ const userSchema = new mongoose.Schema(
   }
 );
 
+const MAX_LOGIN_ATTEMPTS = 4;
+const LOCK_TIME = 5 * 60 * 1000; // 5 minutes
+
+// Virtual field to check if the account is locked
+userSchema.virtual("isLocked").get(function () {
+  return !!(this.lockUntil && this.lockUntil > Date.now());
+});
+
+// Method to increment login attempts
+userSchema.methods.incrementLoginAttempts = function () {
+  if (this.lockUntil && this.lockUntil < Date.now()) {
+    return this.updateOne({
+      $set: { loginAttempts: 1 }, // Reset attempts after lock period
+      $unset: { lockUntil: 1 }, // Remove lock
+    }).exec(); // Use exec() to return a promise
+  }
+
+  let updates = { $inc: { loginAttempts: 1 } };
+  // Lock the account if max attempts reached
+  if (this.loginAttempts + 1 >= MAX_LOGIN_ATTEMPTS && !this.isLocked) {
+    updates.$set = { lockUntil: Date.now() + LOCK_TIME };
+  }
+  return this.updateOne(updates).exec();
+};
+
+// Method to reset login attempts after successful login
+userSchema.methods.resetLoginAttempts = function () {
+  return this.updateOne({
+    $set: { loginAttempts: 0 },
+    $unset: { lockUntil: 1 },
+  }).exec();
+};
+
 // Index for better performance
 userSchema.index({ username: 1 });
 userSchema.index({ email: 1 });
