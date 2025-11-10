@@ -8,6 +8,7 @@ const registerUser = require("./routes/user/userRegister").registerUser;
 const getUserList = require("./routes/user/userList").getUsers;
 const getUserProfile = require("./routes/user/userProfile").getUserProfile;
 const loginUser = require("./routes/user/userLogin").loginUser;
+const { logoutUser } = require("./routes/user/userLogout");
 const { deleteUserAccount } = require("./routes/user/userDelete");
 const { authenticateToken } = require("./middleware/auth");
 
@@ -40,6 +41,8 @@ app.get("/api/users", getUserList);
 app.get("/api/users/:username", getUserProfile);
 // USER LOGIN
 app.post("/auth/login", loginUser);
+// USER LOGOUT
+app.post("/auth/logout", authenticateToken, logoutUser);
 // USER REGISTRATION
 app.post("/auth/register", registerUser);
 // DELETE OWN ACCOUNT (secure endpoint with JWT authentication)
