@@ -11,6 +11,10 @@ const loginUser = require("./routes/user/userLogin").loginUser;
 const { logoutUser } = require("./routes/user/userLogout");
 const { deleteUserAccount } = require("./routes/user/userDelete");
 const { authenticateToken } = require("./middleware/auth");
+const {
+  activateAccount,
+  resendActivation,
+} = require("./routes/user/userActivate");
 
 const port = process.env.PORT || 3000;
 
@@ -45,6 +49,9 @@ app.post("/auth/login", loginUser);
 app.post("/auth/logout", authenticateToken, logoutUser);
 // USER REGISTRATION
 app.post("/auth/register", registerUser);
+// USER ACTIVATION
+app.get("/auth/activate/:token", activateAccount);
+app.post("/auth/resend-activation", resendActivation);
 // DELETE OWN ACCOUNT (secure endpoint with JWT authentication)
 app.delete("/api/users/me", authenticateToken, deleteUserAccount);
 
