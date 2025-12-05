@@ -276,6 +276,47 @@ class UserRepository {
       throw new Error(`Error finding users with pagination: ${error.message}`);
     }
   }
+
+  /**
+   * Find user by activation token
+   * @param {string} hashedToken - Hashed activation token
+   * @returns {Promise<Object|null>} - User object or null if not found
+   */
+  static async findByActivationToken(hashedToken) {
+    try {
+      const user = await User.findOne({
+        activationToken: hashedToken,
+        activationTokenExpires: { $gt: Date.now() },
+      }).select("+activationToken +activationTokenExpires");
+      return user;
+    } catch (error) {
+      throw new Error(
+        `Error finding user by activation token: ${error.message}`
+      );
+    }
+  }
+
+  /**
+   * Activate user account
+   * @param {string} userId - User ID to activate
+   * @returns {Promise<Object|null>} - Activated user object or null if not found
+   */
+
+  static async activateUser(userId) {
+    try {
+      const user = await User.findByIdAndUpdate(
+        userId,
+        {
+          $set: { isActivated: true },
+          $unset: { activationToken: 1, activationTokenExpires: 1 },
+        },
+        { new: true }
+      );
+      return user;
+    } catch (error) {
+      throw new Error(`Error activating user: ${error.message}`);
+    }
+  }
 }
 
 module.exports = UserRepository;
