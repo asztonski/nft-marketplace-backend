@@ -6,7 +6,7 @@ const { Resend } = require("resend");
 class EmailService {
   constructor() {
     this.resend = new Resend(process.env.RESEND_API_KEY);
-    this.fromEmail = "webdreadjm@gmail.com"; // Zmień na swoją zweryfikowaną domenę
+    this.fromEmail = "onboarding@resend.dev"; // ✅ Działa od razu
   }
 
   /**
