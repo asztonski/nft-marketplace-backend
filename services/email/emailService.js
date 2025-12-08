@@ -19,7 +19,7 @@ class EmailService {
   async sendActivationEmail(email, username, activationToken) {
     try {
       const activationUrl = `${
-        process.env.LIVE_ORIGIN || "http://localhost:3000"
+        process.env.FRONTEND_URL || "http://localhost:3000"
       }/auth/activate/${activationToken}`;
 
       const { data, error } = await this.resend.emails.send({
@@ -66,7 +66,7 @@ class EmailService {
   async sendPasswordResetEmail(email, resetToken) {
     try {
       const resetUrl = `${
-        process.env.LIVE_ORIGIN || "http://localhost:3000"
+        process.env.SERVER_URL || "http://localhost:3000"
       }/auth/reset-password/${resetToken}`;
 
       const { data, error } = await this.resend.emails.send({
