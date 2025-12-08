@@ -20,7 +20,7 @@ class EmailService {
     try {
       const activationUrl = `${
         process.env.FRONTEND_URL || "http://localhost:3000"
-      }/auth/activate/${activationToken}`;
+      }/account-activated?token=${activationToken}`;
 
       const { data, error } = await this.resend.emails.send({
         from: this.fromEmail,
