@@ -20,6 +20,16 @@ const loginUser = async (req, res) => {
       return res.status(401).json({ error: "Invalid email or password" });
     }
 
+    // Check if account is activated
+    if (!user.isActivated) {
+      return res
+        .status(403)
+        .json({
+          error: "Account not activated. Please activate your account.",
+          needsActivation: true,
+        });
+    }
+
     // Check if account is locked
     if (UserService.isAccountLocked(user)) {
       const lockTime = user.lockUntil ? new Date(user.lockUntil) : null;

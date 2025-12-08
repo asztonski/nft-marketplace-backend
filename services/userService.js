@@ -4,6 +4,7 @@ const {
   UserValidator,
   UsernameGenerator,
   UserMigration,
+  EmailService,
 } = require("./modules");
 
 /**
@@ -319,6 +320,76 @@ class UserService {
       return await UserRepository.findWithPagination(criteria, options);
     } catch (error) {
       throw new Error(`Error getting paginated users: ${error.message}`);
+    }
+  }
+
+  /**
+   * ACTIVATE USER ACCOUNT
+   * @param {string} token - Activation token
+   * @returns {Promise<Object>} - Activated result
+   */
+  static async activateUserAccount(token) {
+    try {
+      const crypto = require("crypto");
+      const hashedToken = crypto
+        .createHash("sha256")
+        .update(token)
+        .digest("hex");
+      const user = await UserRepository.findByActivationToken(hashedToken);
+
+      if (!user) {
+        throw new Error("Invalid or expired activation token");
+      }
+      if (user.isActivated) {
+        throw new Error("Account is already activated");
+      }
+      // Activate account and clear token
+      await UserRepository.activateUser(user._id);
+
+      return {
+        success: true,
+        message: "Account successfully activated",
+        userName: user.username,
+      };
+    } catch (error) {
+      throw new Error(`Error activating account: ${error.message}`);
+    }
+  }
+
+  /**
+   * RESEND ACTIVATION EMAIL
+   * @param {string} email - User email
+   * @returns {Promise<Object>} - Resend result
+   */
+  static async resendActivationEmail(email) {
+    try {
+      const user = await UserRepository.findByEmail(email);
+
+      if (!user) {
+        throw new Error("No account found with that email");
+      }
+
+      if (user.isActivated) {
+        throw new Error("Account is already activated");
+      }
+
+      // Generate new activation token
+      const activationToken = user.generateActivationToken();
+      await user.save();
+
+      // Send activation email
+      await EmailService.sendActivationEmail(
+        user.email,
+        user.username,
+        activationToken
+      );
+
+      return {
+        success: true,
+        message: "Activation email resent successfully",
+      };
+    } catch (error) {
+      throw new Error(`Error resending activation email: ${error.message}`);
     }
   }
 }

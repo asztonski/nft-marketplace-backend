@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const crypto = require("crypto");
 
 const userSchema = new mongoose.Schema(
   {
@@ -27,6 +28,14 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    activationToken: {
+      type: String,
+      select: false, // Do not return activation token by default
+    },
+    activationTokenExpires: {
+      type: Date,
+      select: false, // Do not return activation token expiration by default
+    },
     loginAttempts: {
       type: Number,
       default: 0, // Track failed login attempts
@@ -53,6 +62,16 @@ const LOCK_TIME = 5 * 60 * 1000; // 5 minutes
 userSchema.virtual("isLocked").get(function () {
   return !!(this.lockUntil && this.lockUntil > Date.now());
 });
+
+userSchema.methods.generateActivationToken = function () {
+  const token = crypto.randomBytes(20).toString("hex");
+  this.activationToken = crypto
+    .createHash("sha256")
+    .update(token)
+    .digest("hex");
+  this.activationTokenExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+  return token; // Return unhashed token to send in email
+};
 
 // Method to increment login attempts
 userSchema.methods.incrementLoginAttempts = function () {
@@ -82,5 +101,6 @@ userSchema.methods.resetLoginAttempts = function () {
 // Index for better performance
 userSchema.index({ username: 1 });
 userSchema.index({ email: 1 });
+userSchema.index({ activationToken: 1, activationTokenExpires: 1 }); // Index for activation token queries
 
 module.exports = mongoose.model("User", userSchema);

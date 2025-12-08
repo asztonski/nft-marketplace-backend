@@ -1,5 +1,6 @@
 const bcrypt = require("bcrypt");
 const UserService = require("../../services/userService");
+const { EmailService } = require("../../services/modules");
 
 const registerUser = async (req, res) => {
   try {
@@ -42,8 +43,25 @@ const registerUser = async (req, res) => {
       password: hashedPassword,
     });
 
+    // Generate activation token
+    const activationToken = newUser.generateActivationToken();
+    await newUser.save();
+
+    // Send activation email
+    try {
+      await EmailService.sendActivationEmail(
+        newUser.email,
+        newUser.username,
+        activationToken
+      );
+    } catch (emailError) {
+      console.error("Failed to send activation email:", emailError);
+      // Continue with registration even if email fails
+    }
+
     res.status(201).json({
-      message: "User added successfully",
+      message:
+        "User added successfully. Please check your email to activate your account.",
       username: newUser.username,
       desiredUsername: desiredUsername,
       isUsernameModified:
