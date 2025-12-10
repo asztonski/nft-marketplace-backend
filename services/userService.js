@@ -6,6 +6,10 @@ const {
   UserMigration,
   EmailService,
 } = require("./modules");
+const {
+  AccountAlreadyActivatedError,
+  InvalidTokenError,
+} = require("../utils/customErrors");
 
 /**
  * UserService - Main business logic layer for user operations
@@ -337,15 +341,14 @@ class UserService {
         .digest("hex");
       const user = await UserRepository.findByActivationToken(hashedToken);
 
-      if (!token) {
-        throw new Error("Activation token is invalid or expired");
-      }
       if (!user) {
-        throw new Error("No account found for this activation token");
+        throw new InvalidTokenError("Activation token is invalid or expired");
       }
+
       if (user.isActivated) {
-        throw new Error("Account is already activated");
+        throw new AccountAlreadyActivatedError("Konto zostało już aktywowane");
       }
+
       // Activate account and clear token
       await UserRepository.activateUser(user._id);
 
@@ -355,6 +358,13 @@ class UserService {
         userName: user.username,
       };
     } catch (error) {
+      // Przekaż niestandardowe błędy bez modyfikacji
+      if (
+        error instanceof AccountAlreadyActivatedError ||
+        error instanceof InvalidTokenError
+      ) {
+        throw error;
+      }
       throw new Error(`Error activating account: ${error.message}`);
     }
   }
