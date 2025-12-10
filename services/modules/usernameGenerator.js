@@ -45,7 +45,6 @@ class UsernameGenerator {
    */
   static cleanUsername(username) {
     return username
-      .toLowerCase()
       .replace(/[^a-z0-9]/g, "") // Remove special characters
       .slice(0, 20); // Limit length
   }
