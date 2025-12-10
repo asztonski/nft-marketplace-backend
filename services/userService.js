@@ -369,7 +369,7 @@ class UserService {
       const user = await UserRepository.findByEmail(email);
 
       if (!user) {
-        throw new Error("No account found with that email");
+        throw new Error("No account found with that email. Please register.");
       }
 
       if (user.isActivated) {
