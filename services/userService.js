@@ -337,8 +337,11 @@ class UserService {
         .digest("hex");
       const user = await UserRepository.findByActivationToken(hashedToken);
 
+      if (!token) {
+        throw new Error("Activation token is invalid or expired");
+      }
       if (!user) {
-        throw new Error("Invalid or expired activation token");
+        throw new Error("No account found for this activation token");
       }
       if (user.isActivated) {
         throw new Error("Account is already activated");
