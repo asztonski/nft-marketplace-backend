@@ -22,12 +22,11 @@ const loginUser = async (req, res) => {
 
     // Check if account is activated
     if (!user.isActivated) {
-      return res
-        .status(403)
-        .json({
-          error: "Account not activated. Please activate your account.",
-          needsActivation: true,
-        });
+      return res.status(403).json({
+        error:
+          "Account not activated. Please check your email to activate your account.",
+        needsActivation: true,
+      });
     }
 
     // Check if account is locked
