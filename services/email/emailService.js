@@ -6,7 +6,7 @@ const { Resend } = require("resend");
 class EmailService {
   constructor() {
     this.resend = new Resend(process.env.RESEND_API_KEY);
-    this.fromEmail = "onboarding@resend.dev"; // ✅ Działa od razu
+    this.fromEmail = "noreply@webdread.com";
   }
 
   /**
@@ -23,7 +23,7 @@ class EmailService {
       }/account-activated?token=${activationToken}`;
 
       const { data, error } = await this.resend.emails.send({
-        from: this.fromEmail,
+        from: `NFT Marketplace <${this.fromEmail}>`,
         to: email,
         subject: "Activate Your Account",
         html: `
