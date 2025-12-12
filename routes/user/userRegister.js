@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
 const UserService = require("../../services/userService");
 const { EmailService } = require("../../services/modules");
+const { PASSWORD_CONFIG, EMAIL_CONFIG } = require("../../utils/constants");
 
 const registerUser = async (req, res) => {
   try {
@@ -15,18 +16,15 @@ const registerUser = async (req, res) => {
     }
 
     // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!EMAIL_CONFIG.REGEX.test(email)) {
       return res.status(400).json({
-        error: "Invalid email format",
+        error: EMAIL_CONFIG.ERROR_MESSAGE,
       });
     }
 
-    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
-    if (!passwordRegex.test(password)) {
+    if (!PASSWORD_CONFIG.REGEX.test(password)) {
       return res.status(400).json({
-        error:
-          "Password must be at least 8 characters long and contain at least one letter and one number",
+        error: PASSWORD_CONFIG.ERROR_MESSAGE,
       });
     }
 
