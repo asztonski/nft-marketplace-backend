@@ -60,7 +60,10 @@ Warstwa endpoint-ów HTTP - każdy plik = jeden endpoint:
 - **UserRepository** - operacje CRUD na bazie danych
 - **UserValidator** - walidacja danych (email, hasło, duplikaty)
 - **UsernameGenerator** - generowanie unikalnych nazw użytkownika
-- **UserMigration** - migracja ze starych struktur danych
+
+**Email** (`/services/email/`) - serwis emailów:
+
+- **EmailService** - wysyłanie emailów aktywacyjnych i reset hasła
 
 ### **Models** (`/models/`)
 
@@ -127,14 +130,18 @@ JWT_SECRET=your_secret_key
 
 ## 📡 API Endpoints
 
-| Metoda | Endpoint               | Opis                           | Auth |
-| ------ | ---------------------- | ------------------------------ | ---- |
-| POST   | `/auth/register`       | Rejestracja nowego użytkownika | ❌   |
-| POST   | `/auth/login`          | Logowanie użytkownika          | ❌   |
-| POST   | `/auth/logout`         | Wylogowanie                    | ✅   |
-| GET    | `/api/users`           | Lista wszystkich użytkowników  | ❌   |
-| GET    | `/api/users/:username` | Profil użytkownika             | ❌   |
-| DELETE | `/api/users/me`        | Usunięcie własnego konta       | ✅   |
+| Metoda | Endpoint                  | Opis                                 | Auth |
+| ------ | ------------------------- | ------------------------------------ | ---- |
+| POST   | `/auth/register`          | Rejestracja nowego użytkownika       | ❌   |
+| POST   | `/auth/login`             | Logowanie użytkownika                | ❌   |
+| POST   | `/auth/logout`            | Wylogowanie                          | ✅   |
+| GET    | `/auth/validate`          | Walidacja sesji (lekkie sprawdzenie) | ✅   |
+| GET    | `/auth/activate/:token`   | Aktywacja konta                      | ❌   |
+| POST   | `/auth/resend-activation` | Ponowne wysłanie emaila aktywacji    | ❌   |
+| GET    | `/auth/check-email`       | Sprawdzenie czy email jest zajęty    | ❌   |
+| GET    | `/api/users`              | Lista wszystkich użytkowników        | ❌   |
+| GET    | `/api/users/:username`    | Profil użytkownika                   | ❌   |
+| DELETE | `/api/users/me`           | Usunięcie własnego konta             | ✅   |
 
 ## 💡 Kluczowe Koncepcje
 
@@ -154,9 +161,12 @@ Modules (`UserValidator`, `UsernameGenerator`, itd.) mogą być używane niezale
 ### **Bezpieczeństwo**
 
 - Hasła hashowane bcrypt
-- JWT z czasem wygaśnięcia (5 min)
-- Walidacja danych wejściowych
+- JWT z czasem wygaśnięcia (24h)
+- Walidacja danych wejściowych (scentralizowane stałe)
 - Middleware autoryzacji dla chronionych endpoint-ów
+- Blokada konta po 5 nieudanych próbach logowania
+- Walidacja sesji - sprawdzenie czy user nadal istnieje w bazie
+- Kody błędów z flagą `shouldLogout` dla frontendu
 
 ## 📊 Struktura Użytkownika (MongoDB)
 
@@ -164,9 +174,14 @@ Modules (`UserValidator`, `UsernameGenerator`, itd.) mogą być używane niezale
 {
   username: String (unique),
   email: String (unique),
-  hashedPassword: String,
+  password: String (hashed),
   isActivated: Boolean,
+  activationToken: String (select: false),
+  activationTokenExpires: Date (select: false),
+  loginAttempts: Number,
+  lockUntil: Date,
   createdAt: Date,
+  updatedAt: Date,
   _id: ObjectId
 }
 ```
