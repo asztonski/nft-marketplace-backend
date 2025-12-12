@@ -17,7 +17,7 @@ const activateAccount = async (req, res) => {
     return res.json({
       success: true,
       message: result.message,
-      username: result.userName,
+      username: result.username,
     });
   } catch (error) {
     console.error("Error activating account:", error);
