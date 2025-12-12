@@ -1,6 +1,7 @@
 // middleware/auth.js
 const jwt = require("jsonwebtoken");
 const UserService = require("../services/userService");
+const { TOKEN_EXPIRATION } = require("../utils/constants");
 
 const JWT_SECRET =
   process.env.JWT_SECRET || "your-secret-key-change-in-production";
@@ -14,8 +15,7 @@ const generateToken = (user) => {
   };
 
   return jwt.sign(payload, JWT_SECRET, {
-    // expiresIn: "2min", // Token expires in 2 minutes
-    expiresIn: "24h", // Token expires in 24 hours
+    expiresIn: TOKEN_EXPIRATION.JWT_EXPIRY,
   });
 };
 
