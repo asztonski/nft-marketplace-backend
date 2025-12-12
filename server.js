@@ -3,7 +3,6 @@ require("dotenv").config();
 const express = require("express");
 const app = express();
 const { connectDB } = require("./db");
-const { connectDB: connectMongoose } = require("./db-mongoose");
 const registerUser = require("./routes/user/userRegister").registerUser;
 const getUserList = require("./routes/user/userList").getUsers;
 const getUserProfile = require("./routes/user/userProfile").getUserProfile;
@@ -15,7 +14,10 @@ const {
   activateAccount,
   resendActivation,
 } = require("./routes/user/userActivate");
-const { getCurrentUser } = require("./routes/user/userCheck");
+const {
+  getCurrentUser,
+  checkUserExistence,
+} = require("./routes/user/userCheck");
 
 const port = process.env.PORT || 3000;
 
@@ -55,6 +57,8 @@ app.post("/auth/register", registerUser);
 // USER ACTIVATION
 app.get("/auth/activate/:token", activateAccount);
 app.post("/auth/resend-activation", resendActivation);
+// CHECK IF EMAIL EXISTS (for registration form)
+app.get("/auth/check-email", checkUserExistence);
 // DELETE OWN ACCOUNT (secure endpoint with JWT authentication)
 app.delete("/api/users/me", authenticateToken, deleteUserAccount);
 
@@ -69,12 +73,12 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: "Internal server error" });
 });
 
-// start server AFTER connecting to both MongoDB and Mongoose
-Promise.all([connectDB(), connectMongoose()])
+// start server AFTER connecting to MongoDB
+connectDB()
   .then(() => {
     app.listen(port, () => {
       console.log(`App listening on port ${port}`);
-      console.log("🚀 Server ready with Mongoose integration");
+      console.log("🚀 Server ready");
     });
   })
   .catch((err) => {
