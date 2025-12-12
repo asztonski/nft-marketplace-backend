@@ -108,43 +108,6 @@ class UserRepository {
   }
 
   /**
-   * Count total users
-   * @returns {Promise<number>} - Total number of users
-   */
-  static async countAll() {
-    try {
-      return await User.countDocuments({});
-    } catch (error) {
-      throw new Error(`Error counting users: ${error.message}`);
-    }
-  }
-
-  /**
-   * Find users by criteria with pagination
-   * @param {Object} criteria - Search criteria
-   * @param {Object} options - Pagination options (limit, skip)
-   * @returns {Promise<Object>} - Paginated results
-   */
-  static async findWithPagination(criteria = {}, options = {}) {
-    try {
-      const { limit = 10, skip = 0 } = options;
-
-      const users = await User.find(criteria).limit(limit).skip(skip).exec();
-      const total = await User.countDocuments(criteria);
-
-      return {
-        users,
-        total,
-        limit,
-        skip,
-        hasMore: skip + limit < total,
-      };
-    } catch (error) {
-      throw new Error(`Error finding users with pagination: ${error.message}`);
-    }
-  }
-
-  /**
    * Find user by activation token
    * @param {string} hashedToken - Hashed activation token
    * @returns {Promise<Object|null>} - User object or null if not found
