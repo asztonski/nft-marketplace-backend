@@ -191,84 +191,9 @@ class UserService {
     }
   }
 
-  /**
-   * GENERATE MULTIPLE USERNAME SUGGESTIONS
-   * @param {string} desiredUsername - The desired username
-   * @param {number} count - Number of suggestions (default: 5)
-   * @returns {Promise<string[]>} - Array of username suggestions
-   */
-  static async generateUsernameSuggestions(desiredUsername, count = 5) {
-    try {
-      return await UsernameGenerator.generateSuggestions(
-        desiredUsername,
-        count
-      );
-    } catch (error) {
-      throw new Error(
-        `Error generating username suggestions: ${error.message}`
-      );
-    }
-  }
-
-  // ========================================
-  // VALIDATION HELPERS
-  // ========================================
-
-  /**
-   * CHECK IF EMAIL IS ALREADY IN USE
-   * @param {string} email - Email to check
-   * @returns {Promise<boolean>} - True if email is taken
-   */
-  static async isEmailTaken(email) {
-    try {
-      return await UserValidator.isEmailTaken(email);
-    } catch (error) {
-      throw new Error(`Error checking email availability: ${error.message}`);
-    }
-  }
-
-  /**
-   * CHECK IF USERNAME IS ALREADY IN USE
-   * @param {string} username - Username to check
-   * @returns {Promise<boolean>} - True if username is taken
-   */
-  static async isUsernameTaken(username) {
-    try {
-      return await UserValidator.isUsernameTaken(username);
-    } catch (error) {
-      throw new Error(`Error checking username availability: ${error.message}`);
-    }
-  }
-
   // ========================================
   // UTILITY METHODS
   // ========================================
-
-  /**
-   * GET TOTAL USER COUNT ACROSS ALL STRUCTURES
-   * @returns {Promise<number>} - Total number of users
-   */
-  static async getUserCount() {
-    try {
-      return await UserRepository.countAll();
-    } catch (error) {
-      throw new Error(`Error counting users: ${error.message}`);
-    }
-  }
-
-  /**
-   * GET USERS WITH PAGINATION
-   * @param {Object} criteria - Search criteria
-   * @param {Object} options - Pagination options
-   * @returns {Promise<Object>} - Paginated user results
-   */
-  static async getUsersWithPagination(criteria = {}, options = {}) {
-    try {
-      return await UserRepository.findWithPagination(criteria, options);
-    } catch (error) {
-      throw new Error(`Error getting paginated users: ${error.message}`);
-    }
-  }
 
   /**
    * ACTIVATE USER ACCOUNT
@@ -349,6 +274,11 @@ class UserService {
     }
   }
 
+  /**
+   * CHECK IF USER EXISTS BY EMAIL (for registration form validation)
+   * @param {string} email - Email to check
+   * @returns {Promise<boolean>} - True if user exists
+   */
   static async checkUserExistenceByEmail(email) {
     try {
       const user = await UserRepository.findByEmail(email);
