@@ -15,6 +15,7 @@ const {
   activateAccount,
   resendActivation,
 } = require("./routes/user/userActivate");
+const { getCurrentUser } = require("./routes/user/userCheck");
 
 const port = process.env.PORT || 3000;
 
@@ -39,6 +40,8 @@ app.use((req, res, next) => {
 
 // Routes
 
+// GET CURRENT USER (requires authentication)
+app.get("/auth/me", authenticateToken, getCurrentUser);
 // GET USER LIST
 app.get("/api/users", getUserList);
 // GET USER PROFILE
