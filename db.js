@@ -1,26 +1,19 @@
-// db.js
-const { MongoClient } = require("mongodb");
+// db-mongoose.js
+const mongoose = require("mongoose");
 
-const uri = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_CLUSTER}/?appName=${process.env.MONGO_APP_NAME}`;
-
-const client = new MongoClient(uri);
-const DB_NAME = "nft";
-
-let db;
-
-async function connectDB() {
+const connectDB = async () => {
   try {
-    await client.connect();
-    db = client.db(DB_NAME);
-    console.log("✅ Connected to MongoDB Atlas");
+    const uri = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_CLUSTER}/?appName=${process.env.MONGO_APP_NAME}`;
+
+    await mongoose.connect(uri, {
+      dbName: "nft", // specify the database name
+    });
+
+    console.log("✅ Connected to MongoDB Atlas with Mongoose");
   } catch (err) {
     console.error("❌ MongoDB connection error:", err);
+    process.exit(1);
   }
-}
+};
 
-function getDB() {
-  if (!db) throw new Error("Database not connected. Call connectDB() first.");
-  return db;
-}
-
-module.exports = { connectDB, getDB };
+module.exports = { connectDB };
