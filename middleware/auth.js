@@ -19,7 +19,7 @@ const generateToken = (user) => {
   });
 };
 
-// Verify JWT token middleware
+// Verify JWT token middleware - ENHANCED VERSION
 const authenticateToken = async (req, res, next) => {
   try {
     const authHeader = req.headers["authorization"];
@@ -28,25 +28,39 @@ const authenticateToken = async (req, res, next) => {
     if (!token) {
       return res.status(401).json({
         message: "Access token required",
+        code: "TOKEN_MISSING",
       });
     }
 
     // Verify token
     const decoded = jwt.verify(token, JWT_SECRET);
 
-    // Find user to make sure they still exist
+    // CRITICAL: Verify user still exists and is active
     const user = await UserService.findUserByUsername(decoded.username);
+
     if (!user) {
       return res.status(401).json({
-        message: "User not found",
+        message: "User no longer exists",
+        code: "USER_NOT_FOUND",
+        shouldLogout: true,
+      });
+    }
+
+    // Check if account is still activated
+    if (!user.isActivated) {
+      return res.status(403).json({
+        message: "Account is deactivated",
+        code: "ACCOUNT_DEACTIVATED",
+        shouldLogout: true,
       });
     }
 
     // Add user info to request
     req.user = {
-      id: decoded.id,
-      username: decoded.username,
-      email: decoded.email,
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      isActivated: user.isActivated,
     };
 
     next();
@@ -54,22 +68,78 @@ const authenticateToken = async (req, res, next) => {
     if (error.name === "TokenExpiredError") {
       return res.status(401).json({
         message: "Token expired",
+        code: "TOKEN_EXPIRED",
+        shouldLogout: true,
       });
     } else if (error.name === "JsonWebTokenError") {
       return res.status(401).json({
         message: "Invalid token",
+        code: "TOKEN_INVALID",
+        shouldLogout: true,
       });
     } else {
       console.error("Auth middleware error:", error);
       return res.status(500).json({
         message: "Authentication error",
+        code: "AUTH_ERROR",
       });
     }
+  }
+};
+
+// Lightweight session validation middleware (for frequent checks)
+const validateSession = async (req, res, next) => {
+  try {
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
+
+    if (!token) {
+      return res.status(401).json({
+        valid: false,
+        code: "TOKEN_MISSING",
+      });
+    }
+
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const user = await UserService.findUserByUsername(decoded.username);
+
+    if (!user) {
+      return res.status(401).json({
+        valid: false,
+        code: "USER_NOT_FOUND",
+        shouldLogout: true,
+      });
+    }
+
+    if (!user.isActivated) {
+      return res.status(403).json({
+        valid: false,
+        code: "ACCOUNT_DEACTIVATED",
+        shouldLogout: true,
+      });
+    }
+
+    req.user = {
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      isActivated: user.isActivated,
+    };
+
+    next();
+  } catch (error) {
+    return res.status(401).json({
+      valid: false,
+      code:
+        error.name === "TokenExpiredError" ? "TOKEN_EXPIRED" : "TOKEN_INVALID",
+      shouldLogout: true,
+    });
   }
 };
 
 module.exports = {
   generateToken,
   authenticateToken,
+  validateSession,
   JWT_SECRET,
 };
