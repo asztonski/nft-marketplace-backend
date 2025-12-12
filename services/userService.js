@@ -3,7 +3,6 @@ const {
   UserRepository,
   UserValidator,
   UsernameGenerator,
-  UserMigration,
   EmailService,
 } = require("./modules");
 const {
@@ -176,22 +175,6 @@ class UserService {
   }
 
   // ========================================
-  // ALIAS METHODS FOR BACKWARD COMPATIBILITY
-  // ========================================
-
-  static async getUserByEmail(email) {
-    return this.findUserByEmail(email);
-  }
-
-  static async getUserById(username) {
-    return this.findUserByUsername(username);
-  }
-
-  static async getUserByUsername(username) {
-    return this.findUserByUsername(username);
-  }
-
-  // ========================================
   // USERNAME GENERATION
   // ========================================
 
@@ -258,46 +241,6 @@ class UserService {
   }
 
   // ========================================
-  // MIGRATION OPERATIONS
-  // ========================================
-
-  /**
-   * MIGRATE USERS TO NEW STRUCTURE
-   * @returns {Promise<Object>} - Migration results
-   */
-  static async migrateUsersToNewStructure() {
-    try {
-      return await UserMigration.migrateUsersToNewStructure();
-    } catch (error) {
-      throw new Error(`Migration error: ${error.message}`);
-    }
-  }
-
-  /**
-   * GET MIGRATION STATUS INFORMATION
-   * @returns {Promise<Object>} - Migration status details
-   */
-  static async getMigrationStatus() {
-    try {
-      return await UserMigration.getMigrationStatus();
-    } catch (error) {
-      throw new Error(`Error getting migration status: ${error.message}`);
-    }
-  }
-
-  /**
-   * CREATE BACKUP OF LEGACY USERS BEFORE MIGRATION
-   * @returns {Promise<Object>} - Backup result
-   */
-  static async backupLegacyUsers() {
-    try {
-      return await UserMigration.backupLegacyUsers();
-    } catch (error) {
-      throw new Error(`Error creating backup: ${error.message}`);
-    }
-  }
-
-  // ========================================
   // UTILITY METHODS
   // ========================================
 
@@ -355,7 +298,7 @@ class UserService {
       return {
         success: true,
         message: "Account successfully activated",
-        userName: user.username,
+        username: user.username,
       };
     } catch (error) {
       // Przekaż niestandardowe błędy bez modyfikacji
