@@ -1,4 +1,5 @@
 // services/userService.js
+const bcrypt = require("bcrypt");
 const {
   UserRepository,
   UserValidator,
@@ -51,11 +52,14 @@ class UserService {
         throw new Error(validation.errors.join(", "));
       }
 
+      // Hash password after validation
+      const hashedPassword = await bcrypt.hash(password, 10);
+
       // Create new user
       const newUser = await UserRepository.create({
         username,
         email,
-        password,
+        password: hashedPassword,
         isActivated,
       });
 

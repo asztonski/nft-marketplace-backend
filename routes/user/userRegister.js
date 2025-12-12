@@ -1,4 +1,3 @@
-const bcrypt = require("bcrypt");
 const UserService = require("../../services/userService");
 const { EmailService } = require("../../services/modules");
 const { PASSWORD_CONFIG, EMAIL_CONFIG } = require("../../utils/constants");
@@ -31,14 +30,11 @@ const registerUser = async (req, res) => {
     // Generate unique username from desired username
     const username = await UserService.generateUniqueUsername(desiredUsername);
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create new user with generated unique username
+    // Create new user with generated unique username (password hashing happens in UserService)
     const newUser = await UserService.addUser({
       username,
       email,
-      password: hashedPassword,
+      password,
     });
 
     // Generate activation token
