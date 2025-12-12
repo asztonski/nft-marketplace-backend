@@ -4,7 +4,7 @@ const UserService = require("../../services/userService");
 const getCurrentUser = async (req, res) => {
   try {
     // req.user comes from authenticateToken middleware
-    const userId = req.user.userId; // or req.user.id depending on your JWT payload
+    const userId = req.user.id; // or req.user.id depending on your JWT payload
 
     const user = await UserService.getUserById(userId);
 
