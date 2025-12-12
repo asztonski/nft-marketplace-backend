@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
 const UserService = require("../../services/userService");
 const { generateToken } = require("../../middleware/auth");
+const { LOGIN_SECURITY } = require("../../utils/constants");
 
 const loginUser = async (req, res) => {
   try {
@@ -56,13 +57,13 @@ const loginUser = async (req, res) => {
 
       if (UserService.isAccountLocked(updatedUser)) {
         return res.status(423).json({
-          error:
-            "Account locked due to too many failed login attempts. Please try again in 15 minutes.",
+          error: `Account locked due to too many failed login attempts. Please try again in ${LOGIN_SECURITY.LOCK_TIME_MINUTES} minutes.`,
           lockedUntil: updatedUser.lockUntil,
         });
       }
 
-      const remainingAttempts = 4 - (updatedUser.loginAttempts || 0);
+      const remainingAttempts =
+        LOGIN_SECURITY.MAX_ATTEMPTS - (updatedUser.loginAttempts || 0);
       return res.status(401).json({
         error: "Invalid email or password",
         remainingAttempts: remainingAttempts > 0 ? remainingAttempts : 0,
