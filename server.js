@@ -9,14 +9,14 @@ const getUserProfile = require("./routes/user/userProfile").getUserProfile;
 const loginUser = require("./routes/user/userLogin").loginUser;
 const { logoutUser } = require("./routes/user/userLogout");
 const { deleteUserAccount } = require("./routes/user/userDelete");
-const { authenticateToken } = require("./middleware/auth");
+const { authenticateToken, validateSession } = require("./middleware/auth");
 const {
   activateAccount,
   resendActivation,
 } = require("./routes/user/userActivate");
 const {
-  getCurrentUser,
   checkUserExistence,
+  validateCurrentSession,
 } = require("./routes/user/userCheck");
 
 const port = process.env.PORT || 3000;
@@ -42,8 +42,8 @@ app.use((req, res, next) => {
 
 // Routes
 
-// GET CURRENT USER (requires authentication)
-app.get("/auth/me", authenticateToken, getCurrentUser);
+// VALIDATE SESSION (lightweight check - call periodically from frontend)
+app.get("/auth/validate", validateSession, validateCurrentSession);
 // GET USER LIST
 app.get("/api/users", getUserList);
 // GET USER PROFILE
