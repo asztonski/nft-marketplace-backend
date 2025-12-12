@@ -1,6 +1,10 @@
 // services/modules/usernameGenerator.js
 const { nanoid } = require("nanoid");
 const UserValidator = require("./userValidator");
+const {
+  USERNAME_CONFIG,
+  USERNAME_GENERATOR,
+} = require("../../utils/constants");
 
 /**
  * USERNAME GENERATOR MODULE
@@ -18,9 +22,9 @@ class UsernameGenerator {
       const cleanUsername = this.cleanUsername(desiredUsername);
 
       // Validate minimum length
-      if (cleanUsername.length < 3) {
+      if (cleanUsername.length < USERNAME_CONFIG.MIN_LENGTH) {
         throw new Error(
-          "Username must be at least 3 characters long after cleaning"
+          `Username must be at least ${USERNAME_CONFIG.MIN_LENGTH} characters long after cleaning`
         );
       }
 
@@ -46,7 +50,7 @@ class UsernameGenerator {
   static cleanUsername(username) {
     return username
       .replace(/[^a-zA-Z0-9]/g, "") // Remove special characters
-      .slice(0, 20); // Limit length
+      .slice(0, USERNAME_GENERATOR.MAX_CLEAN_LENGTH); // Limit length
   }
 
   /**
@@ -55,12 +59,12 @@ class UsernameGenerator {
    * @returns {Promise<string>} - Username with suffix
    */
   static async generateWithSuffix(baseUsername) {
-    const maxAttempts = 10;
+    const maxAttempts = USERNAME_GENERATOR.MAX_ATTEMPTS;
     let attempts = 0;
 
     // Try with nanoid suffix
     while (attempts < maxAttempts) {
-      const suffix = nanoid(4); // 4-character suffix
+      const suffix = nanoid(USERNAME_GENERATOR.SUFFIX_LENGTH);
       const candidateUsername = `${baseUsername}_${suffix}`;
 
       const isTaken = await UserValidator.isUsernameTaken(candidateUsername);
@@ -90,12 +94,16 @@ class UsernameGenerator {
       return { isValid: false, errors };
     }
 
-    if (username.length < 3) {
-      errors.push("Username must be at least 3 characters long");
+    if (username.length < USERNAME_CONFIG.MIN_LENGTH) {
+      errors.push(
+        `Username must be at least ${USERNAME_CONFIG.MIN_LENGTH} characters long`
+      );
     }
 
-    if (username.length > 30) {
-      errors.push("Username must be no more than 30 characters long");
+    if (username.length > USERNAME_CONFIG.MAX_LENGTH) {
+      errors.push(
+        `Username must be no more than ${USERNAME_CONFIG.MAX_LENGTH} characters long`
+      );
     }
 
     if (!/^[a-zA-Z0-9_]+$/.test(username)) {
