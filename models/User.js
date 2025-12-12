@@ -1,5 +1,10 @@
 const mongoose = require("mongoose");
 const crypto = require("crypto");
+const {
+  LOGIN_SECURITY,
+  TOKEN_EXPIRATION,
+  USERNAME_CONFIG,
+} = require("../utils/constants");
 
 const userSchema = new mongoose.Schema(
   {
@@ -8,8 +13,14 @@ const userSchema = new mongoose.Schema(
       required: [true, "Username is required"],
       unique: true,
       trim: true,
-      minlength: [3, "Username must be at least 3 characters long"],
-      maxlength: [30, "Username must be less than 30 characters"],
+      minlength: [
+        USERNAME_CONFIG.MIN_LENGTH,
+        `Username must be at least ${USERNAME_CONFIG.MIN_LENGTH} characters long`,
+      ],
+      maxlength: [
+        USERNAME_CONFIG.MAX_LENGTH,
+        `Username must be less than ${USERNAME_CONFIG.MAX_LENGTH} characters`,
+      ],
     },
     email: {
       type: String,
@@ -22,7 +33,8 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: [true, "Password is required"],
-      minlength: [4, "Password must be at least 4 characters long"],
+      // Note: Password is already hashed when saved, so no minlength validation here
+      // Validation happens in the route before hashing
     },
     isActivated: {
       type: Boolean,
@@ -55,8 +67,8 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-const MAX_LOGIN_ATTEMPTS = 4;
-const LOCK_TIME = 5 * 60 * 1000; // 5 minutes
+const MAX_LOGIN_ATTEMPTS = LOGIN_SECURITY.MAX_ATTEMPTS;
+const LOCK_TIME = LOGIN_SECURITY.LOCK_TIME_MS;
 
 // Virtual field to check if the account is locked
 userSchema.virtual("isLocked").get(function () {
@@ -69,7 +81,8 @@ userSchema.methods.generateActivationToken = function () {
     .createHash("sha256")
     .update(token)
     .digest("hex");
-  this.activationTokenExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+  this.activationTokenExpires =
+    Date.now() + TOKEN_EXPIRATION.ACTIVATION_TOKEN_MS;
   return token; // Return unhashed token to send in email
 };
 
