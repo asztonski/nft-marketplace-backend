@@ -10,7 +10,8 @@
     "dev": "node --loader ts-node/esm server.ts",
     "start:prod": "node dist/main.js",
     "start:debug": "node --loader ts-node/esm --inspect-brk server.ts",
-    "prestart:prod": "npm run build"
+    "prestart:prod": "npm run build",
+    "heroku-postbuild": "npm run build"
   },
   "keywords": [
     "node",
@@ -33,13 +34,13 @@
     "nanoid": "^5.1.6",
     "reflect-metadata": "^0.2.2",
     "resend": "^6.5.2",
-    "rxjs": "^7.8.2"
+    "rxjs": "^7.8.2",
+    "typescript": "^5.9.3"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
     "@types/node": "^25.0.9",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+    "ts-node": "^10.9.2"
   },
   "ts-node": {
     "esm": true
