@@ -1,6 +1,6 @@
-const UserService = require("../../services/userService");
+import UserService from "../../services/userService.js";
 
-const getUsers = async (req, res) => {
+export const getUsers = async (req, res) => {
   try {
     const users = await UserService.getAllUsers();
     res.json(users);
@@ -9,5 +9,3 @@ const getUsers = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch users" });
   }
 };
-
-module.exports = { getUsers };

@@ -1,23 +1,24 @@
-// server.js
-require("dotenv").config();
-const express = require("express");
-const app = express();
-const { connectDB } = require("./db");
-const registerUser = require("./routes/user/userRegister").registerUser;
-const getUserList = require("./routes/user/userList").getUsers;
-const getUserProfile = require("./routes/user/userProfile").getUserProfile;
-const loginUser = require("./routes/user/userLogin").loginUser;
-const { logoutUser } = require("./routes/user/userLogout");
-const { deleteUserAccount } = require("./routes/user/userDelete");
-const { authenticateToken, validateSession } = require("./middleware/auth");
-const {
+// server.ts
+import "dotenv/config";
+import express from "express";
+import { connectDB } from "./db.js";
+import { registerUser } from "./routes/user/userRegister.js";
+import { getUsers } from "./routes/user/userList.js";
+import { getUserProfile } from "./routes/user/userProfile.js";
+import { loginUser } from "./routes/user/userLogin.js";
+import { logoutUser } from "./routes/user/userLogout.js";
+import { deleteUserAccount } from "./routes/user/userDelete.js";
+import { authenticateToken, validateSession } from "./middleware/auth.js";
+import {
   activateAccount,
   resendActivation,
-} = require("./routes/user/userActivate");
-const {
+} from "./routes/user/userActivate.js";
+import {
   checkUserExistence,
   validateCurrentSession,
-} = require("./routes/user/userCheck");
+} from "./routes/user/userCheck.js";
+
+const app = express();
 
 const port = process.env.PORT || 3000;
 
@@ -25,12 +26,12 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 
 // CORS middleware to allow frontend requests
-app.use((req, res, next) => {
+app.use((req: any, res: any, next: any) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   res.header(
     "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization",
   );
 
   if (req.method === "OPTIONS") {
@@ -45,7 +46,7 @@ app.use((req, res, next) => {
 // VALIDATE SESSION (lightweight check - call periodically from frontend)
 app.get("/auth/validate", validateSession, validateCurrentSession);
 // GET USER LIST
-app.get("/api/users", getUserList);
+app.get("/api/users", getUsers);
 // GET USER PROFILE
 app.get("/api/users/:username", getUserProfile);
 // USER LOGIN
@@ -63,12 +64,12 @@ app.get("/auth/check-email", checkUserExistence);
 app.delete("/api/users/me", authenticateToken, deleteUserAccount);
 
 // 404 handler
-app.use((req, res) => {
+app.use((req: any, res: any) => {
   res.status(404).json({ error: "Not found" });
 });
 
 // error handler
-app.use((err, req, res, next) => {
+app.use((err: any, req: any, res: any, next: any) => {
   console.error("Unhandled error:", err);
   res.status(500).json({ error: "Internal server error" });
 });

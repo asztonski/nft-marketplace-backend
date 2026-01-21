@@ -1,9 +1,12 @@
-const { Resend } = require("resend");
+import { Resend } from "resend";
 
 /**
  * EMAIL SERVICE - MODULE RESPONSIBLE FOR SENDING EMAILS
  */
 class EmailService {
+  private resend: any;
+  private fromEmail: string;
+
   constructor() {
     this.resend = new Resend(process.env.RESEND_API_KEY);
     this.fromEmail = "noreply@webdread.com";
@@ -105,4 +108,4 @@ class EmailService {
   }
 }
 
-module.exports = new EmailService();
+export default new EmailService();

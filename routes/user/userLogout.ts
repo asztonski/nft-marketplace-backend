@@ -1,4 +1,4 @@
-const logoutUser = async (req, res) => {
+export const logoutUser = async (req, res) => {
   try {
     // W przypadku JWT tokenów, wylogowanie odbywa się głównie po stronie klienta
     // Tutaj możemy dodać dodatkową logikę, np. logowanie aktywności użytkownika
@@ -6,7 +6,7 @@ const logoutUser = async (req, res) => {
     console.log(
       `User ${req.user.username} (${
         req.user.email
-      }) logged out at ${new Date().toISOString()}`
+      }) logged out at ${new Date().toISOString()}`,
     );
 
     res.json({
@@ -19,5 +19,3 @@ const logoutUser = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
-
-module.exports = { logoutUser };

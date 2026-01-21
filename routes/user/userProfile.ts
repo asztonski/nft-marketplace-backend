@@ -1,6 +1,6 @@
-const UserService = require("../../services/userService");
+import UserService from "../../services/userService.js";
 
-const getUserProfile = async (req, res) => {
+export const getUserProfile = async (req, res) => {
   try {
     const username = req.params.username;
     const user = await UserService.findUserByUsername(username);
@@ -15,5 +15,3 @@ const getUserProfile = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
-
-module.exports = { getUserProfile };

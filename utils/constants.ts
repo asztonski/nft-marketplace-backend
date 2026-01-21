@@ -60,7 +60,7 @@ const USERNAME_GENERATOR = {
   MAX_CLEAN_LENGTH: 20,
 };
 
-module.exports = {
+export {
   PASSWORD_CONFIG,
   USERNAME_CONFIG,
   EMAIL_CONFIG,

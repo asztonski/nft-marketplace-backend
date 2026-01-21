@@ -2,13 +2,14 @@
   "name": "simple-node-server",
   "version": "1.0.0",
   "description": "A simple Node.js server",
+  "type": "module",
   "main": "server.js",
   "scripts": {
     "build": "tsc",
     "start": "node dist/server.js",
-    "dev": "ts-node server.ts",
+    "dev": "node --loader ts-node/esm server.ts",
     "start:prod": "node dist/main.js",
-    "start:debug": "ts-node --inspect-brk server.ts",
+    "start:debug": "node --loader ts-node/esm --inspect-brk server.ts",
     "prestart:prod": "npm run build"
   },
   "keywords": [
@@ -39,5 +40,8 @@
     "@types/node": "^25.0.9",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
+  },
+  "ts-node": {
+    "esm": true
   }
 }

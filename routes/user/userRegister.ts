@@ -1,8 +1,8 @@
-const UserService = require("../../services/userService");
-const { EmailService } = require("../../services/modules");
-const { PASSWORD_CONFIG, EMAIL_CONFIG } = require("../../utils/constants");
+import UserService from "../../services/userService.js";
+import { EmailService } from "../../services/modules/index.js";
+import { PASSWORD_CONFIG, EMAIL_CONFIG } from "../../utils/constants.js";
 
-const registerUser = async (req, res) => {
+export const registerUser = async (req, res) => {
   try {
     const { username: desiredUsername, email, password } = req.body;
 
@@ -38,7 +38,7 @@ const registerUser = async (req, res) => {
     });
 
     // Generate activation token
-    const activationToken = newUser.generateActivationToken();
+    const activationToken = (newUser as any).generateActivationToken();
     await newUser.save();
 
     // Send activation email
@@ -46,7 +46,7 @@ const registerUser = async (req, res) => {
       await EmailService.sendActivationEmail(
         newUser.email,
         newUser.username,
-        activationToken
+        activationToken,
       );
     } catch (emailError) {
       console.error("Failed to send activation email:", emailError);
@@ -85,4 +85,3 @@ const registerUser = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
-module.exports = { registerUser };

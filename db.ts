@@ -1,7 +1,7 @@
-// db-mongoose.js
-const mongoose = require("mongoose");
+// db-mongoose.ts
+import mongoose from "mongoose";
 
-const connectDB = async () => {
+export const connectDB = async () => {
   try {
     const uri = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_CLUSTER}/?appName=${process.env.MONGO_APP_NAME}`;
 
@@ -15,5 +15,3 @@ const connectDB = async () => {
     process.exit(1);
   }
 };
-
-module.exports = { connectDB };

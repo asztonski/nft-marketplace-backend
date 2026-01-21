@@ -1,7 +1,7 @@
-const UserService = require("../../services/userService");
+import UserService from "../../services/userService.js";
 
 // CHECK IF USER EXISTS BY EMAIL (public endpoint for registration form)
-const checkUserExistence = async (req, res) => {
+export const checkUserExistence = async (req, res) => {
   try {
     const { email } = req.query;
 
@@ -17,7 +17,7 @@ const checkUserExistence = async (req, res) => {
 };
 
 // VALIDATE CURRENT SESSION - Lightweight check
-const validateCurrentSession = async (req, res) => {
+export const validateCurrentSession = async (req, res) => {
   try {
     // req.user comes from validateSession middleware (already verified)
     res.json({
@@ -36,5 +36,3 @@ const validateCurrentSession = async (req, res) => {
     });
   }
 };
-
-module.exports = { checkUserExistence, validateCurrentSession };

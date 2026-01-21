@@ -1,10 +1,10 @@
-// services/modules/userValidator.js
-const User = require("../../models/User");
-const {
+// services/modules/userValidator.ts
+import User from "../../models/User.js";
+import {
   USERNAME_CONFIG,
   EMAIL_CONFIG,
   PASSWORD_CONFIG,
-} = require("../../utils/constants");
+} from "../../utils/constants.js";
 
 /**
  * UserValidator - Module responsible for user validation logic
@@ -95,4 +95,4 @@ class UserValidator {
   }
 }
 
-module.exports = UserValidator;
+export default UserValidator;

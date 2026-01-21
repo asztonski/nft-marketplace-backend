@@ -1,15 +1,16 @@
-// services/userService.js
-const bcrypt = require("bcrypt");
-const {
+// services/userService.ts
+import bcrypt from "bcrypt";
+import crypto from "crypto";
+import {
   UserRepository,
   UserValidator,
   UsernameGenerator,
   EmailService,
-} = require("./modules");
-const {
+} from "./modules/index.js";
+import {
   AccountAlreadyActivatedError,
   InvalidTokenError,
-} = require("../utils/customErrors");
+} from "../utils/customErrors.js";
 
 /**
  * UserService - Main business logic layer for user operations
@@ -206,7 +207,6 @@ class UserService {
    */
   static async activateUserAccount(token) {
     try {
-      const crypto = require("crypto");
       const hashedToken = crypto
         .createHash("sha256")
         .update(token)
@@ -259,14 +259,14 @@ class UserService {
       }
 
       // Generate new activation token
-      const activationToken = user.generateActivationToken();
+      const activationToken = (user as any).generateActivationToken();
       await user.save();
 
       // Send activation email
       await EmailService.sendActivationEmail(
         user.email,
         user.username,
-        activationToken
+        activationToken,
       );
 
       return {
@@ -293,4 +293,4 @@ class UserService {
   }
 }
 
-module.exports = UserService;
+export default UserService;

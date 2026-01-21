@@ -1,13 +1,13 @@
-// middleware/auth.js
-const jwt = require("jsonwebtoken");
-const UserService = require("../services/userService");
-const { TOKEN_EXPIRATION } = require("../utils/constants");
+// middleware/auth.ts
+import jwt from "jsonwebtoken";
+import UserService from "../services/userService.js";
+import { TOKEN_EXPIRATION } from "../utils/constants.js";
 
 const JWT_SECRET =
   process.env.JWT_SECRET || "your-secret-key-change-in-production";
 
 // Generate JWT token
-const generateToken = (user) => {
+export const generateToken = (user) => {
   const payload = {
     id: user._id || user.username, // Use _id for mongoose, username for legacy
     username: user.username,
@@ -20,7 +20,7 @@ const generateToken = (user) => {
 };
 
 // Verify JWT token middleware - ENHANCED VERSION
-const authenticateToken = async (req, res, next) => {
+export const authenticateToken = async (req, res, next) => {
   try {
     const authHeader = req.headers["authorization"];
     const token = authHeader && authHeader.split(" ")[1]; // Bearer TOKEN
@@ -88,7 +88,7 @@ const authenticateToken = async (req, res, next) => {
 };
 
 // Lightweight session validation middleware (for frequent checks)
-const validateSession = async (req, res, next) => {
+export const validateSession = async (req, res, next) => {
   try {
     const authHeader = req.headers["authorization"];
     const token = authHeader && authHeader.split(" ")[1];
@@ -137,9 +137,4 @@ const validateSession = async (req, res, next) => {
   }
 };
 
-module.exports = {
-  generateToken,
-  authenticateToken,
-  validateSession,
-  JWT_SECRET,
-};
+export { JWT_SECRET };

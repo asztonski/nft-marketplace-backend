@@ -1,10 +1,10 @@
-const mongoose = require("mongoose");
-const crypto = require("crypto");
-const {
+import mongoose from "mongoose";
+import crypto from "crypto";
+import {
   LOGIN_SECURITY,
   TOKEN_EXPIRATION,
   USERNAME_CONFIG,
-} = require("../utils/constants");
+} from "../utils/constants.js";
 
 const userSchema = new mongoose.Schema(
   {
@@ -64,7 +64,7 @@ const userSchema = new mongoose.Schema(
   {
     timestamps: true, // Automatically adds createdAt and updatedAt fields
     collection: "users", // Use a different collection name to avoid conflicts with legacy data
-  }
+  },
 );
 
 const MAX_LOGIN_ATTEMPTS = LOGIN_SECURITY.MAX_ATTEMPTS;
@@ -72,7 +72,7 @@ const LOCK_TIME = LOGIN_SECURITY.LOCK_TIME_MS;
 
 // Virtual field to check if the account is locked
 userSchema.virtual("isLocked").get(function () {
-  return !!(this.lockUntil && this.lockUntil > Date.now());
+  return !!(this.lockUntil && this.lockUntil.getTime() > Date.now());
 });
 
 userSchema.methods.generateActivationToken = function () {
@@ -95,7 +95,7 @@ userSchema.methods.incrementLoginAttempts = function () {
     }).exec(); // Use exec() to return a promise
   }
 
-  let updates = { $inc: { loginAttempts: 1 } };
+  let updates: any = { $inc: { loginAttempts: 1 } };
   // Lock the account if max attempts reached
   if (this.loginAttempts + 1 >= MAX_LOGIN_ATTEMPTS && !this.isLocked) {
     updates.$set = { lockUntil: Date.now() + LOCK_TIME };
@@ -116,4 +116,4 @@ userSchema.index({ username: 1 });
 userSchema.index({ email: 1 });
 userSchema.index({ activationToken: 1, activationTokenExpires: 1 }); // Index for activation token queries
 
-module.exports = mongoose.model("User", userSchema);
+export default mongoose.model("User", userSchema);

@@ -1,10 +1,7 @@
-// services/modules/usernameGenerator.js
-const { nanoid } = require("nanoid");
-const UserValidator = require("./userValidator");
-const {
-  USERNAME_CONFIG,
-  USERNAME_GENERATOR,
-} = require("../../utils/constants");
+// services/modules/usernameGenerator.ts
+import { nanoid } from "nanoid";
+import UserValidator from "./userValidator.js";
+import { USERNAME_CONFIG, USERNAME_GENERATOR } from "../../utils/constants.js";
 
 /**
  * USERNAME GENERATOR MODULE
@@ -24,7 +21,7 @@ class UsernameGenerator {
       // Validate minimum length
       if (cleanUsername.length < USERNAME_CONFIG.MIN_LENGTH) {
         throw new Error(
-          `Username must be at least ${USERNAME_CONFIG.MIN_LENGTH} characters long after cleaning`
+          `Username must be at least ${USERNAME_CONFIG.MIN_LENGTH} characters long after cleaning`,
         );
       }
 
@@ -82,4 +79,4 @@ class UsernameGenerator {
   }
 }
 
-module.exports = UsernameGenerator;
+export default UsernameGenerator;

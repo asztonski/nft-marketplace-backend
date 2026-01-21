@@ -1,4 +1,6 @@
 class AccountAlreadyActivatedError extends Error {
+  public statusCode: number;
+
   constructor(message = "Account is already activated") {
     super(message);
     this.name = "AccountAlreadyActivatedError";
@@ -7,6 +9,8 @@ class AccountAlreadyActivatedError extends Error {
 }
 
 class InvalidTokenError extends Error {
+  public statusCode: number;
+
   constructor(message = "Activation token is invalid or expired") {
     super(message);
     this.name = "InvalidTokenError";
@@ -14,7 +18,4 @@ class InvalidTokenError extends Error {
   }
 }
 
-module.exports = {
-  AccountAlreadyActivatedError,
-  InvalidTokenError,
-};
+export { AccountAlreadyActivatedError, InvalidTokenError };

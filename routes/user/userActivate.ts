@@ -1,7 +1,7 @@
-const UserService = require("../../services/userService");
+import UserService from "../../services/userService.js";
 
 // Activate user account - NOW AS API ENDPOINT
-const activateAccount = async (req, res) => {
+export const activateAccount = async (req, res) => {
   try {
     const { token } = req.params;
 
@@ -34,7 +34,7 @@ const activateAccount = async (req, res) => {
 };
 
 // RESEND ACTIVATION EMAIL
-const resendActivation = async (req, res) => {
+export const resendActivation = async (req, res) => {
   try {
     const { email } = req.body;
 
@@ -62,5 +62,3 @@ const resendActivation = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
-
-module.exports = { activateAccount, resendActivation };

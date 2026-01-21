@@ -1,17 +1,12 @@
-// services/modules/index.js
+// services/modules/index.ts
 /**
  * Central export file for all user service modules
  * Provides easy access to all user-related functionality
  */
 
-const UserRepository = require("./userRepository");
-const UserValidator = require("./userValidator");
-const UsernameGenerator = require("./usernameGenerator");
-const EmailService = require("../email/emailService");
+import UserRepository from "./userRepository.js";
+import UserValidator from "./userValidator.js";
+import UsernameGenerator from "./usernameGenerator.js";
+import EmailService from "../email/emailService.js";
 
-module.exports = {
-  UserRepository,
-  UserValidator,
-  UsernameGenerator,
-  EmailService,
-};
+export { UserRepository, UserValidator, UsernameGenerator, EmailService };

@@ -1,9 +1,9 @@
-const bcrypt = require("bcrypt");
-const UserService = require("../../services/userService");
-const { generateToken } = require("../../middleware/auth");
-const { LOGIN_SECURITY } = require("../../utils/constants");
+import bcrypt from "bcrypt";
+import UserService from "../../services/userService.js";
+import { generateToken } from "../../middleware/auth.js";
+import { LOGIN_SECURITY } from "../../utils/constants.js";
 
-const loginUser = async (req, res) => {
+export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -34,7 +34,7 @@ const loginUser = async (req, res) => {
     if (UserService.isAccountLocked(user)) {
       const lockTime = user.lockUntil ? new Date(user.lockUntil) : null;
       const remainingTime = lockTime
-        ? Math.ceil((lockTime - Date.now()) / 60000)
+        ? Math.ceil((lockTime.getTime() - Date.now()) / 60000)
         : 0;
 
       return res.status(423).json({
@@ -94,5 +94,3 @@ const loginUser = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
-
-module.exports = { loginUser };

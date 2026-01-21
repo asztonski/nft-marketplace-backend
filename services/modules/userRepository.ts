@@ -1,5 +1,5 @@
-// services/modules/userRepository.js
-const User = require("../../models/User");
+// services/modules/userRepository.ts
+import User from "../../models/User.js";
 
 /**
  * USER REPOSITORY - MODULE RESPONSIBLE FOR DATA ACCESS
@@ -44,7 +44,7 @@ class UserRepository {
         .exec();
     } catch (error) {
       throw new Error(
-        `Error finding user by email for login: ${error.message}`
+        `Error finding user by email for login: ${error.message}`,
       );
     }
   }
@@ -120,7 +120,7 @@ class UserRepository {
       }).select("+activationToken +activationTokenExpires");
     } catch (error) {
       throw new Error(
-        `Error finding user by activation token: ${error.message}`
+        `Error finding user by activation token: ${error.message}`,
       );
     }
   }
@@ -138,7 +138,7 @@ class UserRepository {
           $set: { isActivated: true },
           $unset: { activationToken: 1, activationTokenExpires: 1 },
         },
-        { new: true }
+        { new: true },
       );
     } catch (error) {
       throw new Error(`Error activating user: ${error.message}`);
@@ -146,4 +146,4 @@ class UserRepository {
   }
 }
 
-module.exports = UserRepository;
+export default UserRepository;

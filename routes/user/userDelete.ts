@@ -1,7 +1,7 @@
-const UserService = require("../../services/userService");
+import UserService from "../../services/userService.js";
 
 // Delete own account (secure endpoint for logged-in users)
-const deleteUserAccount = async (req, res) => {
+export const deleteUserAccount = async (req, res) => {
   try {
     const { confirmText } = req.body;
 
@@ -38,5 +38,3 @@ const deleteUserAccount = async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
-
-module.exports = { deleteUserAccount };
