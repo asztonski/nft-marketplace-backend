@@ -72,11 +72,9 @@ Warstwa endpoint-ów HTTP - każdy plik = jeden endpoint:
 ## 🔐 Przepływ Autoryzacji
 
 1. **Rejestracja**: `POST /auth/register`
-
    - Walidacja danych → Hashowanie hasła (bcrypt) → Zapis do DB → Zwrot tokenu JWT
 
 2. **Logowanie**: `POST /auth/login`
-
    - Sprawdzenie username/email → Weryfikacja hasła → Generowanie tokenu JWT
 
 3. **Zabezpieczone endpointy**:
@@ -188,7 +186,7 @@ Modules (`UserValidator`, `UsernameGenerator`, itd.) mogą być używane niezale
 
 ## 🔧 Utrzymanie i Rozwój
 
-- **Dodanie nowego endpointu**: Utwórz plik w `/routes/`, zarejestruj w `server.js`
+- **Dodanie nowego endpointu**: Utwórz plik w `/routes/`, zarejestruj w `server.ts`
 - **Nowa logika biznesowa**: Rozszerz `UserService` lub dodaj nowy moduł w `/services/modules/`
 - **Zmiana walidacji**: Edytuj `UserValidator`
 - **Modyfikacja schematu**: Aktualizuj `models/User.js`

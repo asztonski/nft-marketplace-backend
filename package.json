@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "A simple Node.js server",
   "type": "module",
-  "main": "server.js",
+  "main": "server.ts",
   "scripts": {
     "build": "tsc",
     "start": "node dist/server.js",
