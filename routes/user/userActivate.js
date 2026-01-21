@@ -17,21 +17,14 @@ const activateAccount = async (req, res) => {
     return res.json({
       success: true,
       message: result.message,
-      username: result.userName,
+      username: result.username,
     });
   } catch (error) {
     console.error("Error activating account:", error);
 
-    let statusCode = 500;
-    let errorMessage = "Internal server error";
-
-    if (error.message.includes("Invalid or expired")) {
-      statusCode = 400;
-      errorMessage = error.message;
-    } else if (error.message.includes("already activated")) {
-      statusCode = 400;
-      errorMessage = error.message;
-    }
+    // ✅ Użyj statusCode z błędu jeśli istnieje
+    const statusCode = error.statusCode || 500;
+    const errorMessage = error.message || "Internal server error";
 
     return res.status(statusCode).json({
       success: false,

@@ -1,10 +1,14 @@
 // services/modules/userValidator.js
 const User = require("../../models/User");
-const { getDB } = require("../../db");
+const {
+  USERNAME_CONFIG,
+  EMAIL_CONFIG,
+  PASSWORD_CONFIG,
+} = require("../../utils/constants");
 
 /**
  * UserValidator - Module responsible for user validation logic
- * Handles checking for duplicate users in both new and legacy structures
+ * Handles checking for duplicate users
  */
 class UserValidator {
   /**
@@ -15,50 +19,12 @@ class UserValidator {
    */
   static async userExists(email, username = null) {
     try {
-      // Check new structure (Mongoose)
-      const query = username
-        ? { $or: [{ email: email }, { username: username }] }
-        : { email: email };
+      const query = username ? { $or: [{ email }, { username }] } : { email };
 
       const existingUser = await User.findOne(query);
-
-      if (existingUser) {
-        return true;
-      }
-
-      // Check legacy structure
-      return await this.checkLegacyStructure(email, username);
+      return !!existingUser;
     } catch (error) {
       throw new Error(`Error checking if user exists: ${error.message}`);
-    }
-  }
-
-  /**
-   * Check if user exists in legacy structure
-   * @param {string} email - User email to check
-   * @param {string} username - Username to check (optional)
-   * @returns {Promise<boolean>} - Returns true if user exists in legacy structure
-   */
-  static async checkLegacyStructure(email, username = null) {
-    try {
-      const db = getDB();
-      const usersCollection = db.collection("users");
-      const usersDoc = await usersCollection.findOne({});
-
-      if (usersDoc && usersDoc.users) {
-        const legacyUser = usersDoc.users.find((user) => {
-          if (username) {
-            return user.email === email || user.username === username;
-          }
-          return user.email === email;
-        });
-
-        return !!legacyUser;
-      }
-
-      return false;
-    } catch (error) {
-      throw new Error(`Error checking legacy structure: ${error.message}`);
     }
   }
 
@@ -68,7 +34,12 @@ class UserValidator {
    * @returns {Promise<boolean>} - Returns true if email is taken
    */
   static async isEmailTaken(email) {
-    return await this.userExists(email);
+    try {
+      const existingUser = await User.findOne({ email });
+      return !!existingUser;
+    } catch (error) {
+      throw new Error(`Error checking email availability: ${error.message}`);
+    }
   }
 
   /**
@@ -78,25 +49,8 @@ class UserValidator {
    */
   static async isUsernameTaken(username) {
     try {
-      // Check new structure
-      const existingUser = await User.findOne({ username: username });
-      if (existingUser) {
-        return true;
-      }
-
-      // Check legacy structure
-      const db = getDB();
-      const usersCollection = db.collection("users");
-      const usersDoc = await usersCollection.findOne({});
-
-      if (usersDoc && usersDoc.users) {
-        const legacyUser = usersDoc.users.find(
-          (user) => user.username === username
-        );
-        return !!legacyUser;
-      }
-
-      return false;
+      const existingUser = await User.findOne({ username });
+      return !!existingUser;
     } catch (error) {
       throw new Error(`Error checking username availability: ${error.message}`);
     }
@@ -111,17 +65,19 @@ class UserValidator {
     const { username, email, password } = userData;
     const errors = [];
 
-    // Basic validation
-    if (!username || username.length < 3) {
-      errors.push("Username must be at least 3 characters long");
+    // Username validation
+    if (!username || username.length < USERNAME_CONFIG.MIN_LENGTH) {
+      errors.push(USERNAME_CONFIG.ERROR_MESSAGE);
     }
 
-    if (!email || !/\S+@\S+\.\S+/.test(email)) {
-      errors.push("Valid email address is required");
+    // Email validation
+    if (!email || !EMAIL_CONFIG.REGEX.test(email)) {
+      errors.push(EMAIL_CONFIG.ERROR_MESSAGE);
     }
 
-    if (!password || password.length < 6) {
-      errors.push("Password must be at least 6 characters long");
+    // Password validation
+    if (!password || !PASSWORD_CONFIG.REGEX.test(password)) {
+      errors.push(PASSWORD_CONFIG.ERROR_MESSAGE);
     }
 
     // Check for existing user
@@ -134,7 +90,7 @@ class UserValidator {
 
     return {
       isValid: errors.length === 0,
-      errors: errors,
+      errors,
     };
   }
 }

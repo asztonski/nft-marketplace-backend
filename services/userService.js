@@ -1,11 +1,15 @@
 // services/userService.js
+const bcrypt = require("bcrypt");
 const {
   UserRepository,
   UserValidator,
   UsernameGenerator,
-  UserMigration,
   EmailService,
 } = require("./modules");
+const {
+  AccountAlreadyActivatedError,
+  InvalidTokenError,
+} = require("../utils/customErrors");
 
 /**
  * UserService - Main business logic layer for user operations
@@ -48,11 +52,14 @@ class UserService {
         throw new Error(validation.errors.join(", "));
       }
 
+      // Hash password after validation
+      const hashedPassword = await bcrypt.hash(password, 10);
+
       // Create new user
       const newUser = await UserRepository.create({
         username,
         email,
-        password,
+        password: hashedPassword,
         isActivated,
       });
 
@@ -172,22 +179,6 @@ class UserService {
   }
 
   // ========================================
-  // ALIAS METHODS FOR BACKWARD COMPATIBILITY
-  // ========================================
-
-  static async getUserByEmail(email) {
-    return this.findUserByEmail(email);
-  }
-
-  static async getUserById(username) {
-    return this.findUserByUsername(username);
-  }
-
-  static async getUserByUsername(username) {
-    return this.findUserByUsername(username);
-  }
-
-  // ========================================
   // USERNAME GENERATION
   // ========================================
 
@@ -204,124 +195,9 @@ class UserService {
     }
   }
 
-  /**
-   * GENERATE MULTIPLE USERNAME SUGGESTIONS
-   * @param {string} desiredUsername - The desired username
-   * @param {number} count - Number of suggestions (default: 5)
-   * @returns {Promise<string[]>} - Array of username suggestions
-   */
-  static async generateUsernameSuggestions(desiredUsername, count = 5) {
-    try {
-      return await UsernameGenerator.generateSuggestions(
-        desiredUsername,
-        count
-      );
-    } catch (error) {
-      throw new Error(
-        `Error generating username suggestions: ${error.message}`
-      );
-    }
-  }
-
-  // ========================================
-  // VALIDATION HELPERS
-  // ========================================
-
-  /**
-   * CHECK IF EMAIL IS ALREADY IN USE
-   * @param {string} email - Email to check
-   * @returns {Promise<boolean>} - True if email is taken
-   */
-  static async isEmailTaken(email) {
-    try {
-      return await UserValidator.isEmailTaken(email);
-    } catch (error) {
-      throw new Error(`Error checking email availability: ${error.message}`);
-    }
-  }
-
-  /**
-   * CHECK IF USERNAME IS ALREADY IN USE
-   * @param {string} username - Username to check
-   * @returns {Promise<boolean>} - True if username is taken
-   */
-  static async isUsernameTaken(username) {
-    try {
-      return await UserValidator.isUsernameTaken(username);
-    } catch (error) {
-      throw new Error(`Error checking username availability: ${error.message}`);
-    }
-  }
-
-  // ========================================
-  // MIGRATION OPERATIONS
-  // ========================================
-
-  /**
-   * MIGRATE USERS TO NEW STRUCTURE
-   * @returns {Promise<Object>} - Migration results
-   */
-  static async migrateUsersToNewStructure() {
-    try {
-      return await UserMigration.migrateUsersToNewStructure();
-    } catch (error) {
-      throw new Error(`Migration error: ${error.message}`);
-    }
-  }
-
-  /**
-   * GET MIGRATION STATUS INFORMATION
-   * @returns {Promise<Object>} - Migration status details
-   */
-  static async getMigrationStatus() {
-    try {
-      return await UserMigration.getMigrationStatus();
-    } catch (error) {
-      throw new Error(`Error getting migration status: ${error.message}`);
-    }
-  }
-
-  /**
-   * CREATE BACKUP OF LEGACY USERS BEFORE MIGRATION
-   * @returns {Promise<Object>} - Backup result
-   */
-  static async backupLegacyUsers() {
-    try {
-      return await UserMigration.backupLegacyUsers();
-    } catch (error) {
-      throw new Error(`Error creating backup: ${error.message}`);
-    }
-  }
-
   // ========================================
   // UTILITY METHODS
   // ========================================
-
-  /**
-   * GET TOTAL USER COUNT ACROSS ALL STRUCTURES
-   * @returns {Promise<number>} - Total number of users
-   */
-  static async getUserCount() {
-    try {
-      return await UserRepository.countAll();
-    } catch (error) {
-      throw new Error(`Error counting users: ${error.message}`);
-    }
-  }
-
-  /**
-   * GET USERS WITH PAGINATION
-   * @param {Object} criteria - Search criteria
-   * @param {Object} options - Pagination options
-   * @returns {Promise<Object>} - Paginated user results
-   */
-  static async getUsersWithPagination(criteria = {}, options = {}) {
-    try {
-      return await UserRepository.findWithPagination(criteria, options);
-    } catch (error) {
-      throw new Error(`Error getting paginated users: ${error.message}`);
-    }
-  }
 
   /**
    * ACTIVATE USER ACCOUNT
@@ -338,20 +214,29 @@ class UserService {
       const user = await UserRepository.findByActivationToken(hashedToken);
 
       if (!user) {
-        throw new Error("Invalid or expired activation token");
+        throw new InvalidTokenError("Activation token is invalid or expired");
       }
+
       if (user.isActivated) {
-        throw new Error("Account is already activated");
+        throw new AccountAlreadyActivatedError("Konto zostało już aktywowane");
       }
+
       // Activate account and clear token
       await UserRepository.activateUser(user._id);
 
       return {
         success: true,
         message: "Account successfully activated",
-        userName: user.username,
+        username: user.username,
       };
     } catch (error) {
+      // Przekaż niestandardowe błędy bez modyfikacji
+      if (
+        error instanceof AccountAlreadyActivatedError ||
+        error instanceof InvalidTokenError
+      ) {
+        throw error;
+      }
       throw new Error(`Error activating account: ${error.message}`);
     }
   }
@@ -366,7 +251,7 @@ class UserService {
       const user = await UserRepository.findByEmail(email);
 
       if (!user) {
-        throw new Error("No account found with that email");
+        throw new Error("No account found with that email. Please register.");
       }
 
       if (user.isActivated) {
@@ -390,6 +275,20 @@ class UserService {
       };
     } catch (error) {
       throw new Error(`Error resending activation email: ${error.message}`);
+    }
+  }
+
+  /**
+   * CHECK IF USER EXISTS BY EMAIL (for registration form validation)
+   * @param {string} email - Email to check
+   * @returns {Promise<boolean>} - True if user exists
+   */
+  static async checkUserExistenceByEmail(email) {
+    try {
+      const user = await UserRepository.findByEmail(email);
+      return !!user;
+    } catch (error) {
+      throw new Error(`Error checking user existence: ${error.message}`);
     }
   }
 }
