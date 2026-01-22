@@ -1,7 +1,7 @@
 import UserService from "../../shared/services/userService.js";
 
 // Delete own account (secure endpoint for logged-in users)
-export const deleteAccount = async (req, res) => {
+export const deleteUserAccount = async (req, res) => {
   try {
     const { confirmText } = req.body;
 
