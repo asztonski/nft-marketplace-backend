@@ -3,8 +3,10 @@ import UserService from "../../shared/services/userService.js";
 // Activate user account - NOW AS API ENDPOINT
 export const activateAccount = async (req, res) => {
   try {
+    // Bierzemy token z parametrów URL
     const { token } = req.params;
 
+    // Sprawdzamy, czy token istnieje
     if (!token) {
       return res.status(400).json({
         success: false,
@@ -12,8 +14,10 @@ export const activateAccount = async (req, res) => {
       });
     }
 
+    // Aktywujemy konto użytkownika za pomocą serwisu
     const result = await UserService.activateUserAccount(token);
 
+    // Zwracamy odpowiedź z sukcesem
     return res.json({
       success: true,
       message: result.message,
