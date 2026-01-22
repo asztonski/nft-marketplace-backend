@@ -39,7 +39,7 @@ class UserService {
    * @returns {Promise<Object>} - Created user object
    */
   static async addUser(userData) {
-    const { username, email, password, isActivated = false } = userData;
+    const { username, email, password, isActivated = false, avatar } = userData;
 
     try {
       // Validate user data
@@ -62,6 +62,7 @@ class UserService {
         email,
         password: hashedPassword,
         isActivated,
+        avatar,
       });
 
       return newUser;
