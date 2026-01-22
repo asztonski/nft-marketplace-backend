@@ -68,13 +68,7 @@ class UserRepository {
    */
   static async create(userData) {
     try {
-      // Ensure avatar field is always set, even if not provided
-      const userDataWithDefaults = {
-        ...userData,
-        avatar: userData.avatar !== undefined ? userData.avatar : "",
-      };
-
-      const newUser = new User(userDataWithDefaults);
+      const newUser = new User(userData);
       return await newUser.save();
     } catch (error) {
       if (error.code === 11000) {
