@@ -1,5 +1,5 @@
 import "dotenv/config";
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
 import { registerUser } from "./features/auth/userRegister.js";
 import { getUsers } from "./features/users/userList.js";
 import { getUserProfile } from "./features/users/userProfile.js";
@@ -25,7 +25,7 @@ const app = express();
 app.use(express.json());
 
 // CORS middleware to allow frontend requests
-app.use((req: any, res: any, next: any) => {
+app.use((req: Request, res: Response, next: NextFunction) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   res.header(
@@ -63,12 +63,12 @@ app.get("/auth/check-email", checkUserExistence);
 app.delete("/api/users/me", authenticateToken, deleteUserAccount);
 
 // 404 handler
-app.use((req: any, res: any) => {
+app.use((req: Request, res: Response) => {
   res.status(404).json({ error: "Not found" });
 });
 
 // error handler
-app.use((err: any, req: any, res: any, next: any) => {
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   console.error("Unhandled error:", err);
   res.status(500).json({ error: "Internal server error" });
 });
