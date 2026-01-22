@@ -61,6 +61,32 @@ const userSchema = new mongoose.Schema(
       trim: true,
       required: false,
     },
+    userBio: {
+      type: String,
+      default: "",
+      trim: true,
+      maxlength: [500, "Bio must be less than 500 characters"],
+    },
+    followedProfiles: {
+      type: [String],
+      default: [],
+    },
+    ownedAssets: {
+      type: [String], // Array of asset IDs
+      default: [],
+    },
+    likedAssets: {
+      type: [String], // Array of asset IDs  
+      default: [],
+    },
+    soldAssets: {
+      type: [String], // Array of asset IDs
+      default: [],
+    },
+    createdAssets: {
+      type: [String], // Array of asset IDs
+      default: [],
+    },
   },
   {
     timestamps: true, // Automatically adds createdAt and updatedAt fields
