@@ -59,6 +59,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
       trim: true,
+      required: false, // Explicitly mark as not required but ensure it exists
     },
   },
   {
