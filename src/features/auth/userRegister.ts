@@ -35,7 +35,7 @@ export const registerUser = async (req, res) => {
       username,
       email,
       password,
-      avatar: "", // Explicitly set avatar to ensure it's created in the database
+      avatar: null, // Set avatar as null initially
     });
 
     // Generate activation token
