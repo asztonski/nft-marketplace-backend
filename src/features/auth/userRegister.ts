@@ -35,6 +35,7 @@ export const registerUser = async (req, res) => {
       username,
       email,
       password,
+      avatar: "", // Explicitly set avatar to ensure it's created in the database
     });
 
     // Generate activation token
@@ -70,6 +71,7 @@ export const registerUser = async (req, res) => {
         isActivated: newUser.isActivated,
         createdAt: newUser.createdAt,
         updatedAt: newUser.updatedAt,
+        avatar: newUser.avatar,
       },
     });
   } catch (err) {
