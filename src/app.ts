@@ -5,7 +5,8 @@ import { getUsers } from "./features/users/userList.js";
 import { getUserProfile } from "./features/users/userProfile.js";
 import { loginUser } from "./features/auth/userLogin.js";
 import { logoutUser } from "./features/auth/userLogout.js";
-import { deleteUserAccount } from "./features/users/userDelete.js";
+import { deleteUserAccount } from "./features/account/accountDelete.js";
+import { getAccountProfile } from "./features/account/accountProfile.js";
 import {
   authenticateToken,
   validateSession,
@@ -60,7 +61,8 @@ app.post("/auth/resend-activation", resendActivation);
 // CHECK IF EMAIL EXISTS (for registration form)
 app.get("/auth/check-email", checkUserExistence);
 // DELETE OWN ACCOUNT (secure endpoint with JWT authentication)
-app.delete("/api/users/me", authenticateToken, deleteUserAccount);
+app.get("/api/account/me", authenticateToken, getAccountProfile);
+app.delete("/api/account/me", authenticateToken, deleteUserAccount);
 
 // 404 handler
 app.use((req: Request, res: Response) => {
