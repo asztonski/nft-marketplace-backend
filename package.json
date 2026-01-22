@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "description": "A simple Node.js server",
   "type": "module",
-  "main": "server.ts",
+  "main": "src/server.ts",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/server.js",
-    "dev": "node --loader ts-node/esm server.ts",
-    "start:prod": "node dist/main.js",
+    "start": "node dist/src/server.js",
+    "dev": "node --loader ts-node/esm src/server.ts",
+    "start:prod": "node dist/src/server.js",
     "start:debug": "node --loader ts-node/esm --inspect-brk server.ts",
     "prestart:prod": "npm run build",
     "heroku-postbuild": "npm run build"
