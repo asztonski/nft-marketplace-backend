@@ -1,4 +1,4 @@
-import UserService from "../../services/userService.js";
+import UserService from "../../shared/services/userService.js";
 
 // Activate user account - NOW AS API ENDPOINT
 export const activateAccount = async (req, res) => {

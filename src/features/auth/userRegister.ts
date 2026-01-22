@@ -1,6 +1,6 @@
-import UserService from "../../services/userService.js";
-import { EmailService } from "../../services/modules/index.js";
-import { PASSWORD_CONFIG, EMAIL_CONFIG } from "../../utils/constants.js";
+import UserService from "../../shared/services/userService.js";
+import { EmailService } from "../../shared/services/modules/index.js";
+import { PASSWORD_CONFIG, EMAIL_CONFIG } from "../../shared/utils/constants.js";
 
 export const registerUser = async (req, res) => {
   try {

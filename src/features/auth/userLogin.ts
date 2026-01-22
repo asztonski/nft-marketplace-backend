@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
-import UserService from "../../services/userService.js";
-import { generateToken } from "../../middleware/auth.js";
-import { LOGIN_SECURITY } from "../../utils/constants.js";
+import UserService from "../../shared/services/userService.js";
+import { generateToken } from "../../shared/middleware/auth.js";
+import { LOGIN_SECURITY } from "../../shared/utils/constants.js";
 
 export const loginUser = async (req, res) => {
   try {

@@ -111,9 +111,7 @@ userSchema.methods.resetLoginAttempts = function () {
   }).exec();
 };
 
-// Index for better performance
-userSchema.index({ username: 1 });
-userSchema.index({ email: 1 });
+// Index for better performance (unique: true already creates indexes for username and email)
 userSchema.index({ activationToken: 1, activationTokenExpires: 1 }); // Index for activation token queries
 
 export default mongoose.model("User", userSchema);

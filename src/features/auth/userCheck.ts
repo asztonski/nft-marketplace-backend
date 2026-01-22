@@ -1,4 +1,4 @@
-import UserService from "../../services/userService.js";
+import UserService from "../../shared/services/userService.js";
 
 // CHECK IF USER EXISTS BY EMAIL (public endpoint for registration form)
 export const checkUserExistence = async (req, res) => {

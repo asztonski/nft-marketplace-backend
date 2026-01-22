@@ -1,4 +1,4 @@
-import UserService from "../../services/userService.js";
+import UserService from "../../shared/services/userService.js";
 
 // Delete own account (secure endpoint for logged-in users)
 export const deleteUserAccount = async (req, res) => {
