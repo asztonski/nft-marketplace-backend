@@ -35,7 +35,7 @@ export const registerUser = async (req, res) => {
       username,
       email,
       password,
-      avatar: null, // Set avatar as null initially
+      avatar: "", // Set avatar as empty string
     });
 
     // Generate activation token
